@@ -2,8 +2,12 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Định tuyến nhà ga T3 - Sân bay Tân Sơn Nhất</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=Instrument+Serif:opsz,wght@8..72,400;8..72,600&display=swap" rel="stylesheet" />
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -11,88 +15,110 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#f7f3ef" />
+
+  <!-- iOS Add to Home Screen -->
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="T3 Routing" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
-<body>
+<body class="app">
 
-  <!-- Header -->
-  <header class="app-header">
-    <h1>🚏 Định tuyến nhà ga T3</h1>
-    <p class="subtitle">Sân bay Quốc tế Tân Sơn Nhất — Prototype HCI</p>
-  </header>
-
-  <div class="app-layout">
-
-    <!-- Panel bên trái -->
-    <aside class="side-panel">
-      <div class="panel-section">
-        <h3>📍 Chọn tuyến</h3>
-        <div class="route-form">
-          <label>Điểm đi</label>
-          <select id="from-select">
-            <option value="">— Chọn điểm đi —</option>
-          </select>
-
-          <label>Điểm đến</label>
-          <select id="to-select">
-            <option value="">— Chọn điểm đến —</option>
-          </select>
-
-          <button id="find-route-btn" class="btn-primary">🚶 Tìm đường</button>
-          <button id="clear-route-btn" class="btn-secondary">🗑️ Xoá</button>
-        </div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">T3</div>
+      <div class="brand-text">
+        <h1>Định tuyến nhà ga T3</h1>
+        <p class="subtitle">Sân bay Quốc tế Tân Sơn Nhất — Prototype HCI</p>
       </div>
-
-      <div id="route-info" class="panel-section route-info hidden">
-        <h3>📋 Chi tiết tuyến</h3>
-        <div id="route-details"></div>
-      </div>
-
-      <div class="panel-section">
-        <h3>⚙️ Chế độ</h3>
-        <label class="toggle-label">
-          <input type="checkbox" id="edit-mode-toggle" />
-          <span class="toggle-text">🖊️ Chế độ đánh dấu</span>
-        </label>
-        <p id="edit-mode-hint" class="hint hidden">
-          Click vào bản đồ để thêm điểm mới.<br />
-          <strong>Kéo thả</strong> marker để điều chỉnh vị trí.<br />
-          <strong>Chuột phải</strong> vào marker để xoá.
-        </p>
-      </div>
-
-      <div class="panel-section" id="manage-points-section">
-        <h3>📌 Quản lý điểm</h3>
-        <div id="custom-points-list">
-          <p class="hint">Chưa có điểm tự đánh dấu.</p>
-        </div>
-        <button id="clear-all-points-btn" class="btn-secondary" style="margin-top: 8px; font-size: 11px; display: none;">
-          🗑️ Xoá tất cả điểm đã đánh
-        </button>
-        <button id="export-coords-btn" class="btn-secondary" style="margin-top: 6px; font-size: 11px; display: none;">
-          📋 Sao chép tọa độ cho trợ lý
-        </button>
-        <textarea id="export-textarea" style="
-          display: none; width: 100%; margin-top: 6px;
-          padding: 6px; font-size: 11px; font-family: monospace;
-          border: 1px solid #ddd; border-radius: 4px; resize: vertical;
-          min-height: 60px; background: #f5f5f5;
-        " readonly></textarea>
-      </div>
-    </aside>
-
-    <!-- Map container -->
-    <main class="map-area">
-
-      <!-- Floor selector tabs -->
-      <div class="floor-tabs" id="floor-tabs">
+    </div>
+    <div class="topbar-actions">
+      <div class="floor-tabs topbar-tabs" id="floor-tabs">
         <button class="floor-btn active" data-floor="1">Tầng 1 🛂</button>
         <button class="floor-btn" data-floor="2">Tầng 2 🛍️</button>
         <button class="floor-btn" data-floor="3">Tầng 3 🛫</button>
       </div>
+      <button id="panel-toggle" class="btn btn-ghost" aria-expanded="true" aria-controls="side-panel">
+        Bảng điều khiển
+      </button>
+    </div>
+  </header>
 
+  <div class="layout">
+
+    <!-- Panel -->
+    <aside class="side-panel" id="side-panel">
+      <div class="panel-grip" aria-hidden="true"></div>
+      <div class="panel-header">
+        <div>
+          <h2>Điều hướng</h2>
+          <p class="muted">Chọn tuyến, xem chi tiết, hoặc đánh dấu điểm mới.</p>
+        </div>
+      </div>
+
+      <div class="panel-scroll">
+        <section class="panel-section">
+          <h3>📍 Chọn tuyến</h3>
+          <div class="route-form">
+            <div class="route-field route-field--from is-hidden">
+              <label>Điểm đi</label>
+              <select id="from-select">
+                <option value="">— Chọn điểm đi —</option>
+              </select>
+            </div>
+
+            <label>Điểm đến</label>
+            <select id="to-select">
+              <option value="">— Chọn điểm đến —</option>
+            </select>
+
+            <button id="find-route-btn" class="btn btn-primary">🚶 Tìm đường</button>
+            <button id="clear-route-btn" class="btn btn-secondary">🗑️ Xoá</button>
+          </div>
+        </section>
+
+        <section id="route-info" class="panel-section route-info hidden">
+          <h3>📋 Chi tiết tuyến</h3>
+          <div id="route-details"></div>
+        </section>
+
+        <section class="panel-section">
+          <h3>⚙️ Chế độ</h3>
+          <label class="toggle-label">
+            <input type="checkbox" id="edit-mode-toggle" />
+            <span class="toggle-text">🖊️ Chế độ đánh dấu</span>
+          </label>
+          <p id="edit-mode-hint" class="hint hidden">
+            Click vào bản đồ để thêm điểm mới.<br />
+            <strong>Kéo thả</strong> marker để điều chỉnh vị trí.<br />
+            <strong>Chuột phải</strong> vào marker để xoá.
+          </p>
+        </section>
+
+        <section class="panel-section" id="manage-points-section">
+          <h3>📌 Quản lý điểm</h3>
+          <div id="custom-points-list">
+            <p class="hint">Chưa có điểm tự đánh dấu.</p>
+          </div>
+          <button id="clear-all-points-btn" class="btn btn-secondary btn-small" style="display: none;">
+            🗑️ Xoá tất cả điểm đã đánh
+          </button>
+          <button id="export-coords-btn" class="btn btn-ghost btn-small" style="display: none;">
+            📋 Sao chép tọa độ cho trợ lý
+          </button>
+          <textarea id="export-textarea" class="export-textarea" readonly style="display: none;"></textarea>
+        </section>
+      </div>
+    </aside>
+
+    <div class="panel-backdrop" id="panel-backdrop" aria-hidden="true"></div>
+
+    <!-- Map -->
+    <main class="map-area">
       <div id="map"></div>
     </main>
-
   </div>
 
   <!-- JavaScript -->

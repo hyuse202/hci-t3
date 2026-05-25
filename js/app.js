@@ -1265,23 +1265,11 @@ const App = (() => {
                : '#28a745';
 
     const isCustom = node.id.startsWith('custom-');
-    const borderStyle = isCustom ? 'border: 2px dashed #fff;' : 'border: 2px solid #fff;';
 
     const icon = L.divIcon({
       className: 'poi-marker',
       html: `
-        <div style="
-          background: ${color};
-          color: #fff;
-          padding: 6px 10px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 600;
-          white-space: nowrap;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          cursor: pointer;
-          ${borderStyle}
-        ">
+        <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};">
           ${node.label}
         </div>
       `,
@@ -1635,24 +1623,12 @@ const App = (() => {
                   : node.floor === 2 ? '#0066cc'
                   : '#28a745';
       html += `
-        <div class="custom-point-item" style="
-          display: flex; align-items: center; gap: 6px;
-          padding: 4px 0; border-bottom: 1px solid #eee;
-          font-size: 12px;
-        ">
-          <span style="
-            background: ${color}; color: #fff;
-            border-radius: 50%; width: 18px; height: 18px;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 9px; font-weight: 700; flex-shrink: 0;
-          ">${idx + 1}</span>
-          <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${node.label} <span style="color: #999;">[T${node.floor}]</span>
+        <div class="custom-point-item">
+          <span class="custom-point-index" style="--poi-color: ${color};">${idx + 1}</span>
+          <span class="custom-point-name">
+            ${node.label} <span class="muted">[T${node.floor}]</span>
           </span>
-          <button onclick="App.deleteCustomNode('${node.id}')" style="
-            background: none; border: none; cursor: pointer;
-            color: #d32f2f; font-size: 16px; padding: 0 4px;
-          " title="Xoá">✕</button>
+          <button class="icon-button" onclick="App.deleteCustomNode('${node.id}')" title="Xoá">✕</button>
         </div>
       `;
     });
@@ -1686,7 +1662,7 @@ const App = (() => {
       try {
         navigator.clipboard.writeText(code);
         textarea.style.background = '#e8f5e9';
-        setTimeout(() => { textarea.style.background = '#f5f5f5'; }, 2000);
+        setTimeout(() => { textarea.style.background = '#f5f1ec'; }, 2000);
       } catch(e) {}
     }
   }
@@ -1701,6 +1677,52 @@ const App = (() => {
 
     // Đặt lại
     placeMarkers(map);
+  }
+
+  // --- Mobile panel toggle ---
+  function setupPanelToggle() {
+    const toggle = document.getElementById('panel-toggle');
+    const backdrop = document.getElementById('panel-backdrop');
+    if (!toggle) return;
+
+    const setOpen = (open) => {
+      document.body.classList.toggle('panel-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+
+    const media = window.matchMedia('(max-width: 900px)');
+    const syncState = () => {
+      setOpen(!media.matches);
+    };
+
+    syncState();
+    if (media.addEventListener) {
+      media.addEventListener('change', syncState);
+    } else if (media.addListener) {
+      media.addListener(syncState);
+    }
+
+    toggle.addEventListener('click', () => {
+      setOpen(!document.body.classList.contains('panel-open'));
+    });
+
+    if (backdrop) {
+      backdrop.addEventListener('click', () => setOpen(false));
+    }
+  }
+
+  // --- Service worker registration ---
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => {
+          console.log('🧩 Service worker registered');
+        })
+        .catch((err) => {
+          console.warn('Service worker registration failed:', err);
+        });
+    });
   }
 
   // --- Init map with placeholder or real images ---
@@ -1725,6 +1747,8 @@ const App = (() => {
     placeMarkers(map);
     populateDropdowns();
     renderCustomPointsList();
+    setupPanelToggle();
+    registerServiceWorker();
 
     // Floor switch events
     document.querySelectorAll('.floor-btn').forEach(btn => {

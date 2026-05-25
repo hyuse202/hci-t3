@@ -37,6 +37,15 @@ Sau đó vào trình duyệt gõ: `http://localhost:5500`
 
 ---
 
+## 📱 PWA / Thêm vào màn hình chính
+
+- **Chrome/Edge (Android/desktop):** mở app → nút cài đặt (Install app).
+- **iOS Safari:** mở app → Share → **Add to Home Screen**.
+
+> Lưu ý: Service Worker chỉ hoạt động khi chạy qua `http://localhost` hoặc `https`.
+
+---
+
 ## 🖼️ Hướng dẫn gắn ảnh sơ đồ
 
 ### Bước 1: Đặt ảnh

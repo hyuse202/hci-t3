@@ -790,7 +790,10 @@ const SAMPLE_POIS = [
     label: '🔼 Thang cuốn',
     x: 1843, y: 771,
     floor: 2,
-    links: [],
+    links: [
+      { to: 'poi-10', weight: 8 },    // liên tầng → T1 Phòng hút thuốc lá
+      { to: 'poi-208', weight: 10 },   // liên tầng → T3 Techcombank
+    ],
   },
 
   // ===== TẦNG 3 — Dữ liệu thật từ sơ đồ ga T3 =====

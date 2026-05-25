@@ -1,0 +1,283 @@
+/* ==========================================
+   NHÀ GA T3 — HCI Prototype Styles
+   ========================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  position: relative;
+}
+
+.app-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.app-header .subtitle {
+  font-size: 13px;
+  color: #8899bb;
+}
+
+/* ---------- Layout ---------- */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 56px);
+}
+
+/* ---------- Side Panel ---------- */
+.side-panel {
+  width: 320px;
+  min-width: 320px;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-section {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.panel-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.route-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  margin: 8px 0 4px;
+}
+
+.route-form select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+  transition: border 0.2s;
+}
+
+.route-form select:focus {
+  border-color: #ff6b35;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,107,53,0.15);
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 9px;
+  margin-top: 12px;
+  background: #ff6b35;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #e55a28;
+}
+
+.btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background: #e0e0e0;
+  color: #555;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #ccc;
+}
+
+/* ---------- Route Info ---------- */
+.route-info {
+  background: #e8f5e9;
+  border-left: 3px solid #4caf50;
+}
+
+.route-info.hidden {
+  display: none;
+}
+
+#route-details {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+}
+
+#route-details .step {
+  padding: 4px 0;
+  border-bottom: 1px dashed #c8e6c9;
+}
+
+#route-details .step:last-child {
+  border-bottom: none;
+}
+
+#route-details .stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-weight: 500;
+}
+
+/* ---------- Edit Mode ---------- */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff6b35;
+}
+
+.toggle-text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hint {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.hint.hidden {
+  display: none;
+}
+
+/* ---------- Floor Tabs ---------- */
+.floor-tabs {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.95);
+  padding: 4px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+.floor-btn {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.floor-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.floor-btn.active {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+/* ---------- Map ---------- */
+.map-area {
+  flex: 1;
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Leaflet overrides ---------- */
+.leaflet-container {
+  background: #e8e8e8;
+}
+
+/* Popup styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px;
+}
+
+/* ---------- Routing path ---------- */
+.route-path {
+  stroke-dasharray: 8, 4;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .side-panel {
+    width: 100%;
+    min-width: unset;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}

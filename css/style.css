@@ -122,13 +122,19 @@ body {
 
 /* ---------- Layout ---------- */
 .layout {
-  display: grid;
-  grid-template-columns: var(--panel-w) 1fr;
+  position: relative;
+  display: block;
   height: calc(100vh - var(--topbar-h));
 }
 
 /* ---------- Panel ---------- */
 .side-panel {
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0;
+  bottom: 0;
+  width: var(--panel-w);
+  z-index: 60;
   background: var(--panel);
   border-right: 1px solid var(--line);
   padding: var(--space-6);
@@ -136,6 +142,7 @@ body {
   flex-direction: column;
   gap: var(--space-5);
   overflow: hidden;
+  box-shadow: var(--shadow-1);
 }
 
 .panel-grip {
@@ -326,6 +333,17 @@ body {
   font-style: italic;
 }
 
+.gps-status {
+  margin-top: var(--space-3);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(30, 136, 229, 0.08);
+  border: 1px solid rgba(30, 136, 229, 0.2);
+  color: #1e4f86;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* ---------- Custom points ---------- */
 .custom-point-item {
   display: flex;
@@ -388,8 +406,10 @@ body {
 
 /* ---------- Map ---------- */
 .map-area {
-  position: relative;
+  position: absolute;
+  inset: 0;
   height: 100%;
+  z-index: 1;
 }
 
 #map {
@@ -476,9 +496,23 @@ body {
   border-style: dashed;
 }
 
+.gps-marker {
+  background: transparent;
+}
+
+.gps-dot {
+  width: 14px;
+  height: 14px;
+  background: #1e88e5;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(30, 136, 229, 0.2), 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
 /* ---------- Panel backdrop (mobile) ---------- */
 .panel-backdrop {
   display: none;
+  z-index: 50;
 }
 
 /* ---------- Responsive ---------- */
@@ -490,7 +524,8 @@ body {
 
 @media (max-width: 900px) {
   :root {
-    --topbar-h: 60px;
+    --topbar-h: 56px;
+    --sheet-peek: 92px;
   }
 
   .layout {
@@ -502,18 +537,22 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 72vh;
+    top: auto;
+    height: 70vh;
     z-index: 40;
     border-right: none;
     border-top: 1px solid var(--line);
-    border-radius: 20px 20px 0 0;
+    border-radius: 18px 18px 0 0;
     transform: translateY(calc(100% - var(--sheet-peek)));
     transition: transform 0.3s ease;
     box-shadow: var(--shadow-1);
+    padding: var(--space-4);
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   }
 
   .panel-grip {
     display: block;
+    margin-bottom: var(--space-2);
   }
 
   .panel-backdrop {
@@ -537,22 +576,125 @@ body {
   }
 
   .topbar {
-    padding: 0 var(--space-4);
+    height: auto;
+    padding: var(--space-3) var(--space-4) var(--space-2);
+    gap: var(--space-3);
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .brand {
+    gap: var(--space-3);
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 
   .brand-text h1 {
-    font-size: 17px;
+    font-size: 16px;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    gap: var(--space-2);
+    justify-content: space-between;
   }
 
   .floor-tabs {
-    padding: 6px;
+    flex: 1;
+    padding: 4px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .floor-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .floor-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   #panel-toggle {
     display: inline-flex;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .panel-header h2 {
+    font-size: 16px;
+  }
+
+  .panel-header p {
+    font-size: 11px;
+  }
+
+  .panel-scroll {
+    gap: var(--space-4);
+    padding-right: 0;
+  }
+
+  .panel-section {
+    padding: var(--space-4);
+    border-radius: 14px;
+  }
+
+  .panel-section h3 {
+    font-size: 11px;
+    margin-bottom: var(--space-3);
+  }
+
+  .route-form select {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 9px 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost.btn-small {
+    width: 100%;
+  }
+
+  #route-details {
+    font-size: 12px;
+  }
+
+  .gps-status {
+    font-size: 11px;
+  }
+
+  .leaflet-control-zoom {
+    margin-top: 8px;
   }
 }
 
+@media (max-width: 600px) {
+  .topbar {
+    padding: var(--space-3) var(--space-3) var(--space-2);
+  }
+
+  .brand-text h1 {
+    font-size: 15px;
+  }
+
+  .side-panel {
+    height: 74vh;
+  }
+}
 @media (min-width: 901px) {
   #panel-toggle {
     display: none;

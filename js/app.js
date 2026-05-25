@@ -998,6 +998,9 @@ const App = (() => {
   // --- State ---
   let currentFloor = 1;
   let editMode = false;
+  let gpsMode = false;
+  let gpsNode = null;
+  let gpsMarker = null;
   let customNodes = [];
   let currentPath = null;
   let currentPathLayer = null;
@@ -1066,15 +1069,15 @@ const App = (() => {
       });
     });
 
-    // Tự nối custom node với node gần nhất cùng tầng (để luôn có đường đi)
-    const baseNodes = pois.filter(p => !p.id.startsWith('custom-'));
+    // Tự nối custom/gps node với node gần nhất cùng tầng (để luôn có đường đi)
+    const baseNodes = pois.filter(p => !p.id.startsWith('custom-') && p.id !== 'gps');
     const ensureCustomConnected = (node) => {
       const current = g[node.id];
       if (!current) return;
 
       const hasBaseEdge = current.edges.some(e => {
         const target = g[e.to];
-        return target && !target.id.startsWith('custom-');
+        return target && !target.id.startsWith('custom-') && target.id !== 'gps';
       });
       if (hasBaseEdge) return;
 
@@ -1103,7 +1106,7 @@ const App = (() => {
     };
 
     pois.forEach(node => {
-      if (node.id.startsWith('custom-')) {
+      if (node.id.startsWith('custom-') || node.id === 'gps') {
         ensureCustomConnected(node);
       }
     });
@@ -1290,6 +1293,14 @@ const App = (() => {
       markerLayers[floorNum].forEach(m => m.addTo(map));
     }
 
+    if (gpsMarker && gpsNode) {
+      if (gpsNode.floor === currentFloor) {
+        gpsMarker.addTo(map);
+      } else {
+        map.removeLayer(gpsMarker);
+      }
+    }
+
     // Vẽ lại path nếu cần
     if (currentPath) {
       drawPath(currentPath);
@@ -1306,6 +1317,7 @@ const App = (() => {
 
   // --- Create Marker for a POI ---
   function createPOIMarker(node, map) {
+    if (node.id === 'gps') return null;
     const color = node.floor === 1 ? '#ff6b35'
                : node.floor === 2 ? '#0066cc'
                : '#28a745';
@@ -1336,6 +1348,14 @@ const App = (() => {
     marker.on('click', () => {
       const fromSelect = document.getElementById('from-select');
       const toSelect = document.getElementById('to-select');
+
+      if (gpsMode) {
+        toSelect.value = node.id;
+        if (fromSelect.value && toSelect.value) {
+          findRoute();
+        }
+        return;
+      }
 
       if (!fromSelect.value) {
         fromSelect.value = node.id;
@@ -1384,8 +1404,10 @@ const App = (() => {
     const allNodes = getAllNodes();
 
     allNodes.forEach(node => {
+      if (node.id === 'gps') return;
       if (!markerLayers[node.floor]) markerLayers[node.floor] = [];
       const marker = createPOIMarker(node, map);
+      if (!marker) return;
       markerLayers[node.floor].push(marker);
 
       // Chỉ add nếu là floor hiện tại
@@ -1404,17 +1426,31 @@ const App = (() => {
     fromSelect.innerHTML = '<option value="">— Chọn điểm đi —</option>';
     toSelect.innerHTML = '<option value="">— Chọn điểm đến —</option>';
 
+    if (gpsNode) {
+      const gpsOpt = document.createElement('option');
+      gpsOpt.value = 'gps';
+      gpsOpt.textContent = '📡 Vị trí hiện tại';
+      fromSelect.appendChild(gpsOpt);
+    }
+
     allNodes.forEach(node => {
+      if (node.id === 'gps') return;
       const opt1 = document.createElement('option');
       opt1.value = node.id;
       opt1.textContent = `[T${node.floor}] ${node.label}`;
       fromSelect.appendChild(opt1);
 
+      if (node.id === 'gps') return;
       const opt2 = document.createElement('option');
       opt2.value = node.id;
       opt2.textContent = `[T${node.floor}] ${node.label}`;
       toSelect.appendChild(opt2);
     });
+
+    if (gpsMode && gpsNode) {
+      fromSelect.value = 'gps';
+      fromSelect.disabled = true;
+    }
   }
 
   // --- Get all nodes (mẫu + custom) ---
@@ -1426,6 +1462,9 @@ const App = (() => {
         combined.push(n);
       }
     });
+    if (gpsNode) {
+      combined.push(gpsNode);
+    }
     return combined;
   }
 
@@ -1553,13 +1592,21 @@ const App = (() => {
       currentPathLayer = null;
     }
     currentPath = null;
-    document.getElementById('from-select').value = '';
+    if (gpsMode && gpsNode) {
+      document.getElementById('from-select').value = 'gps';
+    } else {
+      document.getElementById('from-select').value = '';
+    }
     document.getElementById('to-select').value = '';
     document.getElementById('route-info').classList.add('hidden');
   }
 
   // --- Add custom node (click on map in edit mode) ---
   function addCustomNode(e) {
+    if (gpsMode) {
+      setGpsLocation(e.latlng);
+      return;
+    }
     if (!editMode) return;
 
     const latlng = e.latlng;
@@ -1689,6 +1736,96 @@ const App = (() => {
     if (exportBtn) exportBtn.style.display = 'block';
   }
 
+  function createGpsMarker(node) {
+    const icon = L.divIcon({
+      className: 'gps-marker',
+      html: '<div class="gps-dot"></div>',
+      iconSize: [0, 0],
+      iconAnchor: [7, 7],
+    });
+
+    return L.marker([node.y, node.x], {
+      icon,
+      interactive: false,
+    });
+  }
+
+  function updateGpsStatus() {
+    const status = document.getElementById('gps-status');
+    if (!status) return;
+    if (!gpsNode) {
+      status.classList.add('hidden');
+      status.textContent = '';
+      return;
+    }
+    status.textContent = `Vị trí: T${gpsNode.floor} • (${gpsNode.x}, ${gpsNode.y})`;
+    status.classList.remove('hidden');
+  }
+
+  function setGpsLocation(latlng) {
+    const x = Math.round(latlng.lng);
+    const y = Math.round(latlng.lat);
+    gpsNode = {
+      id: 'gps',
+      label: '📡 Vị trí hiện tại',
+      x,
+      y,
+      floor: currentFloor,
+      links: [],
+    };
+
+    if (!gpsMarker) {
+      gpsMarker = createGpsMarker(gpsNode);
+    }
+    gpsMarker.setLatLng([gpsNode.y, gpsNode.x]);
+    if (gpsMode && gpsNode.floor === currentFloor) {
+      gpsMarker.addTo(map);
+    }
+
+    updateGpsStatus();
+    populateDropdowns();
+
+    const fromSelect = document.getElementById('from-select');
+    if (fromSelect) {
+      fromSelect.value = 'gps';
+    }
+
+    const toId = document.getElementById('to-select').value;
+    if (toId) {
+      findRoute();
+    }
+  }
+
+  function setGpsMode(enabled) {
+    gpsMode = enabled;
+    const hint = document.getElementById('gps-mode-hint');
+    if (hint) hint.classList.toggle('hidden', !gpsMode);
+
+    const fromSelect = document.getElementById('from-select');
+    if (fromSelect) {
+      fromSelect.disabled = gpsMode;
+    }
+
+    if (!gpsMode) {
+      if (gpsMarker) map.removeLayer(gpsMarker);
+      gpsMarker = null;
+      gpsNode = null;
+      updateGpsStatus();
+      populateDropdowns();
+      if (fromSelect && fromSelect.value === 'gps') fromSelect.value = '';
+      return;
+    }
+
+    if (!gpsNode) {
+      setGpsLocation(map.getCenter());
+    } else if (gpsNode.floor === currentFloor && gpsMarker) {
+      gpsMarker.addTo(map);
+    }
+    if (fromSelect) {
+      fromSelect.value = 'gps';
+    }
+  }
+
   // --- Xuất tọa độ dạng JSON để gửi trợ lý ---
   function exportCoords() {
     const points = customNodes.map((n, i) => ({
@@ -1816,6 +1953,11 @@ const App = (() => {
       editMode = e.target.checked;
       document.getElementById('edit-mode-hint').classList.toggle('hidden', !editMode);
       map.dragging[editMode ? 'disable' : 'enable']();
+    });
+
+    // GPS mode toggle
+    document.getElementById('gps-mode-toggle').addEventListener('change', (e) => {
+      setGpsMode(e.target.checked);
     });
 
     // Click on map to add node

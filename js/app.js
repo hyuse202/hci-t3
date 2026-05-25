@@ -546,6 +546,7 @@ const SAMPLE_POIS = [
     floor: 2,
     links: [
       { to: 'poi-111', weight: 5 },
+      { to: 'poi-117', weight: 12 },  // nối hành lang chính
     ],
   },
   {
@@ -1063,6 +1064,48 @@ const App = (() => {
           }
         }
       });
+    });
+
+    // Tự nối custom node với node gần nhất cùng tầng (để luôn có đường đi)
+    const baseNodes = pois.filter(p => !p.id.startsWith('custom-'));
+    const ensureCustomConnected = (node) => {
+      const current = g[node.id];
+      if (!current) return;
+
+      const hasBaseEdge = current.edges.some(e => {
+        const target = g[e.to];
+        return target && !target.id.startsWith('custom-');
+      });
+      if (hasBaseEdge) return;
+
+      const candidates = baseNodes.filter(p => p.floor === node.floor);
+      if (candidates.length === 0) return;
+
+      let nearest = null;
+      let best = Infinity;
+      candidates.forEach(p => {
+        const dx = node.x - p.x;
+        const dy = node.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < best) {
+          best = dist;
+          nearest = p;
+        }
+      });
+
+      if (nearest) {
+        const weight = Math.max(1, Math.round(best / 10));
+        current.edges.push({ to: nearest.id, weight });
+        if (g[nearest.id] && !g[nearest.id].edges.some(e => e.to === node.id)) {
+          g[nearest.id].edges.push({ to: node.id, weight });
+        }
+      }
+    };
+
+    pois.forEach(node => {
+      if (node.id.startsWith('custom-')) {
+        ensureCustomConnected(node);
+      }
     });
 
     return g;

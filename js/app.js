@@ -4,9 +4,9 @@
  *
  * ✅ Cách dùng:
  *   1. Đặt 3 ảnh sơ đồ vào thư mục assets/ với tên:
- *      - floor-1.png  (Tầng 1)
- *      - floor-2.png  (Tầng 2)
- *      - floor-3.png  (Tầng 3)
+ *      - floor-1.png  (Tầng 2)
+ *      - floor-2.png  (Tầng 3)
+ *      - floor-3.png  (Tầng 4)
  *   2. Mở index.html trên browser (Live Server hoặc trực tiếp)
  *   3. Bật "Chế độ đánh dấu" → click vào bản đồ để thêm điểm
  *   4. Chọn điểm đi/đến → bấm "Tìm đường"
@@ -24,16 +24,16 @@ const CONFIG = {
 
   // --- Đường dẫn ảnh ---
   images: {
-    1: 'assets/floor-1.png',   // Tầng 1
-    2: 'assets/floor-2.png',   // Tầng 2
-    3: 'assets/floor-3.png',   // Tầng 3
+    1: 'assets/floor-1.png',   // Tầng 2
+    2: 'assets/floor-2.png',   // Tầng 3
+    3: 'assets/floor-3.png',   // Tầng 4
   },
 
   // --- Tên hiển thị ---
   floorNames: {
-    1: 'Tầng 1 — Hành khách đến',
-    2: 'Tầng 2 — Thương mại',
-    3: 'Tầng 3 — Khởi hành',
+    1: 'Tầng 2 — Hành khách đến',
+    2: 'Tầng 3 — Thương mại',
+    3: 'Tầng 4 — Khởi hành',
   },
 };
 
@@ -43,13 +43,13 @@ const CONFIG = {
    Anh sửa tọa độ (x, y) cho khớp với ảnh sau khi đã đặt ảnh vô.
    - x: từ TRÁI sang PHẢI (0 = mép trái ảnh)
    - y: từ TRÊN xuống DƯỚI (0 = mép trên ảnh)
-   - floor: 1 | 2 | 3
+    - floor: 1 | 2 | 3 (tương ứng Tầng 2 | 3 | 4)
    - Các node có kết nối với nhau thì đặt tên trong links[]
    - weight = khoảng cách thực tế (mét) — để tính thời gian di chuyển
 */
 
 const SAMPLE_POIS = [
-  // ===== TẦNG 1 — Dữ liệu thật từ sơ đồ ga T3 =====
+  // ===== TẦNG 2 (internal floor 1) — Dữ liệu thật từ sơ đồ ga T3 =====
   {
     id: 'poi-1',
     label: '🛗 Thang máy',
@@ -443,7 +443,7 @@ const SAMPLE_POIS = [
     ],
   },
 
-  // ===== TẦNG 2 — Dữ liệu thật từ sơ đồ ga T3 =====
+  // ===== TẦNG 3 (internal floor 2) — Dữ liệu thật từ sơ đồ ga T3 =====
   // --- Gate (cửa khởi hành) ---
   {
     id: 'poi-101',
@@ -797,7 +797,7 @@ const SAMPLE_POIS = [
     ],
   },
 
-  // ===== TẦNG 3 — Dữ liệu thật từ sơ đồ ga T3 =====
+  // ===== TẦNG 4 (internal floor 3) — Dữ liệu thật từ sơ đồ ga T3 =====
   {
     id: 'poi-201',
     label: '💺 Phòng khách The Sens',
@@ -995,6 +995,11 @@ const SAMPLE_POIS = [
 const App = (() => {
   'use strict';
 
+  // --- Floor display helper: internal floor (1-3) → displayed floor (2-4) ---
+  function displayFloor(f) {
+    return f + 1;
+  }
+
   // --- State ---
   let currentFloor = 1;
   let editMode = false;
@@ -1127,12 +1132,12 @@ const App = (() => {
     });
     gScore[startId] = 0;
 
-    // Heuristic: Euclidean distance
+    // Heuristic: Euclidean distance (pixel → mét, không phạt đổi tầng)
+    const PX_PER_M = 10;
     function heuristic(a, b) {
       const dx = graph[a].x - graph[b].x;
       const dy = graph[a].y - graph[b].y;
-      const floorDiff = Math.abs(graph[a].floor - graph[b].floor) * 50; // phạt đổi tầng
-      return Math.sqrt(dx * dx + dy * dy) + floorDiff;
+      return Math.sqrt(dx * dx + dy * dy) / PX_PER_M;
     }
 
     fScore[startId] = heuristic(startId, endId);
@@ -1199,9 +1204,9 @@ const App = (() => {
   function createPlaceholderLayers(map) {
     const bounds = [[0, 0], [CONFIG.imageHeight, CONFIG.imageWidth]];
     const colors = {
-      1: { bg: '#ffe0cc', border: '#ff6b35', label: 'Tầng 1' },
-      2: { bg: '#cce5ff', border: '#0066cc', label: 'Tầng 2' },
-      3: { bg: '#d4edda', border: '#28a745', label: 'Tầng 3' },
+      1: { bg: '#ffe0cc', border: '#ff6b35', label: 'Tầng 2' },
+      2: { bg: '#cce5ff', border: '#0066cc', label: 'Tầng 3' },
+      3: { bg: '#d4edda', border: '#28a745', label: 'Tầng 4' },
     };
 
     for (let f = 1; f <= 3; f++) {
@@ -1437,13 +1442,13 @@ const App = (() => {
       if (node.id === 'gps') return;
       const opt1 = document.createElement('option');
       opt1.value = node.id;
-      opt1.textContent = `[T${node.floor}] ${node.label}`;
+      opt1.textContent = `[T${displayFloor(node.floor)}] ${node.label}`;
       fromSelect.appendChild(opt1);
 
       if (node.id === 'gps') return;
       const opt2 = document.createElement('option');
       opt2.value = node.id;
-      opt2.textContent = `[T${node.floor}] ${node.label}`;
+      opt2.textContent = `[T${displayFloor(node.floor)}] ${node.label}`;
       toSelect.appendChild(opt2);
     });
 
@@ -1492,6 +1497,7 @@ const App = (() => {
       document.getElementById('route-details').innerHTML =
         '<p style="color: #d32f2f;">❌ Không tìm thấy đường đi giữa hai điểm này.</p>';
       document.getElementById('route-info').classList.remove('hidden');
+      autoOpenPanel();
       return;
     }
 
@@ -1500,6 +1506,9 @@ const App = (() => {
 
     // Hiển thị thông tin
     showRouteInfo(path, g);
+
+    // Auto mở panel trên mobile khi có kết quả
+    autoOpenPanel();
   }
 
   // --- Draw path on map ---
@@ -1578,7 +1587,7 @@ const App = (() => {
       const node = nodeMap[id];
       if (!node) return;
       const prefix = idx === 0 ? '🟢 Xuất phát' : idx === path.length - 1 ? '🔴 Điểm đến' : `➡️ Bước ${idx}`;
-      html += `<div class="step">${prefix}: <strong>${node.label}</strong> <span style="color:#888;font-size:11px;">[T${node.floor}]</span></div>`;
+      html += `<div class="step">${prefix}: <strong>${node.label}</strong> <span style="color:#888;font-size:11px;">[T${displayFloor(node.floor)}]</span></div>`;
     });
 
     document.getElementById('route-details').innerHTML = html;
@@ -1719,7 +1728,7 @@ const App = (() => {
         <div class="custom-point-item">
           <span class="custom-point-index" style="--poi-color: ${color};">${idx + 1}</span>
           <span class="custom-point-name">
-            ${node.label} <span class="muted">[T${node.floor}]</span>
+            ${node.label} <span class="muted">[T${displayFloor(node.floor)}]</span>
           </span>
           <button class="icon-button" onclick="App.deleteCustomNode('${node.id}')" title="Xoá">✕</button>
         </div>
@@ -1758,7 +1767,7 @@ const App = (() => {
       status.textContent = '';
       return;
     }
-    status.textContent = `Vị trí: T${gpsNode.floor} • (${gpsNode.x}, ${gpsNode.y})`;
+    status.textContent = `Vị trí: T${displayFloor(gpsNode.floor)} • (${gpsNode.x}, ${gpsNode.y})`;
     status.classList.remove('hidden');
   }
 
@@ -1866,6 +1875,8 @@ const App = (() => {
   function setupPanelToggle() {
     const toggle = document.getElementById('panel-toggle');
     const backdrop = document.getElementById('panel-backdrop');
+    const panel = document.getElementById('side-panel');
+    const grip = document.querySelector('.panel-grip');
     if (!toggle) return;
 
     const setOpen = (open) => {
@@ -1873,9 +1884,13 @@ const App = (() => {
       toggle.setAttribute('aria-expanded', String(open));
     };
 
+    const isMobile = () => window.matchMedia('(max-width: 900px)').matches;
+
     const media = window.matchMedia('(max-width: 900px)');
     const syncState = () => {
-      setOpen(!media.matches);
+      if (!media.matches) {
+        setOpen(true);
+      }
     };
 
     syncState();
@@ -1891,6 +1906,50 @@ const App = (() => {
 
     if (backdrop) {
       backdrop.addEventListener('click', () => setOpen(false));
+    }
+
+    // Tap on collapsed panel to expand (mobile)
+    if (panel) {
+      panel.addEventListener('click', (e) => {
+        if (!isMobile()) return;
+        if (document.body.classList.contains('panel-open')) return;
+        // Don't expand if interacting with form elements
+        const tag = e.target.tagName;
+        if (tag === 'SELECT' || tag === 'BUTTON' || tag === 'INPUT' || tag === 'A' || tag === 'TEXTAREA') return;
+        setOpen(true);
+      });
+    }
+
+    // Drag to expand panel (mobile)
+    let dragStartY = 0;
+    let dragStartOpen = false;
+    if (grip) {
+      grip.addEventListener('touchstart', (e) => {
+        if (!isMobile()) return;
+        dragStartY = e.touches[0].clientY;
+        dragStartOpen = document.body.classList.contains('panel-open');
+      }, { passive: true });
+
+      grip.addEventListener('touchmove', (e) => {
+        if (!isMobile()) return;
+        const dy = e.touches[0].clientY - dragStartY;
+        if (Math.abs(dy) > 20) {
+          if (dy < 0 && !dragStartOpen) {
+            setOpen(true);
+          } else if (dy > 0 && dragStartOpen) {
+            setOpen(false);
+          }
+        }
+      }, { passive: true });
+    }
+  }
+
+  // Auto-open panel on mobile when route is found
+  function autoOpenPanel() {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      document.body.classList.add('panel-open');
+      const toggle = document.getElementById('panel-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
     }
   }
 

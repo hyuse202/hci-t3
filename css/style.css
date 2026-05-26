@@ -525,7 +525,7 @@ body {
 @media (max-width: 900px) {
   :root {
     --topbar-h: 56px;
-    --sheet-peek: 92px;
+    --sheet-peek: 140px;
   }
 
   .layout {
@@ -538,36 +538,71 @@ body {
     right: 0;
     bottom: 0;
     top: auto;
-    height: 70vh;
+    height: 65vh;
     z-index: 40;
     border-right: none;
     border-top: 1px solid var(--line);
     border-radius: 18px 18px 0 0;
     transform: translateY(calc(100% - var(--sheet-peek)));
-    transition: transform 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
     box-shadow: var(--shadow-1);
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    cursor: pointer;
+  }
+
+  .side-panel .panel-scroll {
+    cursor: default;
+  }
+
+  .side-panel::after {
+    content: '🔽 Chạm để mở rộng';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 2px 0 var(--space-2);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, var(--panel) 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .side-panel:not(.panel-open)::after {
+    opacity: 1;
   }
 
   .panel-grip {
     display: block;
-    margin-bottom: var(--space-2);
+    margin: 0 auto var(--space-2);
+    position: relative;
+    z-index: 2;
+    touch-action: none;
   }
 
   .panel-backdrop {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(20, 16, 12, 0.35);
+    background: rgba(20, 16, 12, 0.4);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.35s ease;
     z-index: 35;
   }
 
   body.panel-open .side-panel {
     transform: translateY(0);
+    cursor: default;
+  }
+
+  body.panel-open .side-panel::after {
+    opacity: 0;
   }
 
   body.panel-open .panel-backdrop {
@@ -627,8 +662,21 @@ body {
 
   #panel-toggle {
     display: inline-flex;
-    padding: 8px 10px;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
     font-size: 12px;
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--accent-strong);
+    font-weight: 700;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  #panel-toggle:hover {
+    background: rgba(255, 107, 53, 0.28);
   }
 
   .panel-header h2 {
@@ -640,27 +688,42 @@ body {
   }
 
   .panel-scroll {
-    gap: var(--space-4);
+    gap: var(--space-3);
     padding-right: 0;
   }
 
   .panel-section {
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     border-radius: 14px;
   }
 
   .panel-section h3 {
     font-size: 11px;
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
   }
 
   .route-form select {
-    padding: 9px 10px;
-    font-size: 13px;
+    padding: 10px 10px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .route-form label {
+    margin-bottom: var(--space-1);
+  }
+
+  .toggle-label {
+    padding: 2px 0;
+  }
+
+  .toggle-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
   }
 
   .btn {
-    padding: 9px 12px;
+    padding: 10px 12px;
+    min-height: 44px;
   }
 
   .btn-primary,
@@ -683,16 +746,57 @@ body {
 }
 
 @media (max-width: 600px) {
+  :root {
+    --sheet-peek: 120px;
+  }
+
   .topbar {
-    padding: var(--space-3) var(--space-3) var(--space-2);
+    padding: var(--space-2) var(--space-3) var(--space-2);
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
   }
 
   .brand-text h1 {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .side-panel {
-    height: 74vh;
+    height: 72vh;
+    padding: var(--space-2) var(--space-3);
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .panel-section {
+    padding: var(--space-3);
+  }
+
+  .panel-section h3 {
+    font-size: 10px;
+    margin-bottom: var(--space-2);
+  }
+
+  .route-form select {
+    padding: 9px 8px;
+    font-size: 13px;
+  }
+
+  #panel-toggle {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .btn {
+    padding: 9px 10px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .toggle-text {
+    font-size: 12px;
   }
 }
 @media (min-width: 901px) {

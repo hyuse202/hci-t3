@@ -1580,6 +1580,24 @@ const App = (() => {
     const timeMin = Math.round(totalWeight / 80); // 80m/phút tốc độ trung bình
     html += `${totalWeight} m</strong></span></div>`;
     html += `<div class="stat"><span>⏱️ Thời gian:</span><span><strong>~${timeMin} phút</strong></span></div>`;
+
+    // Voucher nếu quãng đường > 50m
+    if (totalWeight > 50) {
+      const maxDiscounts = [20000, 30000, 50000, 70000, 100000];
+      const maxDiscount = maxDiscounts[Math.floor(Math.random() * maxDiscounts.length)];
+      const code = 'VCH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      html += `
+        <div class="voucher-banner">
+          <div class="voucher-icon">🎉</div>
+          <div class="voucher-body">
+            <div class="voucher-title">Bạn nhận được Voucher!</div>
+            <div class="voucher-desc">Giảm 25% tại quán cà phê giải khát (tối đa ${maxDiscount.toLocaleString('vi-VN')}đ)</div>
+            <div class="voucher-code">Mã: <strong>${code}</strong></div>
+            <div class="voucher-footnote">*Chỉ áp dụng 1 lần, có hiệu lực trong 24h</div>
+          </div>
+        </div>`;
+    }
+
     html += '<hr style="border: none; border-top: 1px dashed #ccc; margin: 8px 0;">';
     html += '<div style="font-weight: 600; margin-bottom: 6px;">📍 Các bước:</div>';
 

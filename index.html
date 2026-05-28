@@ -35,16 +35,34 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <div class="floor-tabs" id="floor-tabs">
-        <button class="floor-btn active" data-floor="1">Tầng 2 🛂</button>
-        <button class="floor-btn" data-floor="2">Tầng 3 🛍️</button>
-        <button class="floor-btn" data-floor="3">Tầng 4 🛫</button>
+      <div class="mobile-search-trigger" id="mobile-search-trigger">
+        <span class="search-icon">🔍</span>
+        <span class="search-text">Tìm điểm đến...</span>
       </div>
-      <button id="panel-toggle" class="btn btn-ghost" aria-expanded="true" aria-controls="side-panel">
-        <span class="toggle-icon">☰</span> <span class="toggle-label">Điều hướng</span>
+      <button class="gps-toggle-btn" id="gps-toggle-btn" title="Bật GPS giả lập">
+        <span class="gps-icon">📡</span>
       </button>
     </div>
   </header>
+
+  <!-- Mobile Search Overlay -->
+  <div class="mobile-search-overlay" id="mobile-search">
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Nhập tên địa điểm..." autocomplete="off" />
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+    <div class="category-chips" id="category-chips">
+      <button class="category-chip" data-cat="gate">✈️ Gates</button>
+      <button class="category-chip" data-cat="lounge">🛋️ Lounge</button>
+      <button class="category-chip" data-cat="wc">🚻 WC</button>
+      <button class="category-chip" data-cat="elevator">🛗 Thang máy</button>
+      <button class="category-chip" data-cat="escalator">🔼 Thang cuốn</button>
+      <button class="category-chip" data-cat="food">☕ Ăn uống</button>
+      <button class="category-chip" data-cat="baggage">🛄 Hành lý</button>
+      <button class="category-chip" data-cat="smoke">🚬 Hút thuốc</button>
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </div>
 
   <div class="layout">
 
@@ -131,6 +149,19 @@
     <main class="map-area">
       <div id="map"></div>
     </main>
+  </div>
+
+  <!-- Floating Floor Tabs -->
+  <div class="floor-tabs-bottom" id="floor-tabs">
+    <button class="floor-btn active" data-floor="1">Tầng 2 🛂</button>
+    <button class="floor-btn" data-floor="2">Tầng 3 🛍️</button>
+    <button class="floor-btn" data-floor="3">Tầng 4 🛫</button>
+  </div>
+
+  <!-- Route Card -->
+  <div class="route-card" id="route-card">
+    <div class="drag-handle"></div>
+    <div class="route-card-content" id="route-card-content"></div>
   </div>
 
   <!-- JavaScript -->

@@ -480,7 +480,7 @@ const SAMPLE_POIS = [
   {
     id: 'poi-104',
     label: '🚪 Gate 12',
-    x: 911, y: 861,
+    x: 918, y: 841,
     floor: 2,
     links: [
       { to: 'poi-102', weight: 15 },
@@ -618,7 +618,7 @@ const SAMPLE_POIS = [
   {
     id: 'poi-117',
     label: '🔼 Thang cuốn',
-    x: 937, y: 518,
+    x: 946, y: 518,
     floor: 2,
     links: [
       { to: 'poi-116', weight: 14 },
@@ -1015,8 +1015,15 @@ const App = (() => {
   let lastClickCoords = null;
   let allMarkerData = {}; // lưu ref marker để xóa/kéo
 
+  // --- Mobile selection state ---
+  let selectedFrom = null;
+  let selectedTo = null;
+  let selectionMode = 'from'; // 'from' | 'to'
+  let activeCategory = null;
+
   // Key localStorage
   const STORAGE_KEY = 'hci-t3-custom-nodes';
+  const POI_POS_KEY = 'hci-t3-poi-positions';
 
   // Graph (xây từ POIs)
   let graph = {};
@@ -1329,50 +1336,64 @@ const App = (() => {
 
     const isCustom = node.id.startsWith('custom-');
 
+    // Extract emoji from label (first character(s) before space)
+    const iconEmoji = node.label.match(/^[\p{Emoji}\p{Emoji_Component}]+/u)?.[0] || '📍';
+    const shortLabel = node.label.replace(/^[\p{Emoji}\p{Emoji_Component}]+\s*/u, '');
+
     const icon = L.divIcon({
       className: 'poi-marker',
       html: `
-        <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};">
-          ${node.label}
+        <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};" data-node-id="${node.id}" data-label="${shortLabel}">
+          <span class="pill-icon">${iconEmoji}</span>
+          <span class="pill-label">${shortLabel}</span>
         </div>
       `,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0],
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
     });
 
     const marker = L.marker([node.y, node.x], {
       icon,
-      draggable: isCustom, // chỉ custom node mới kéo được
+      draggable: false,
     });
 
     marker.nodeId = node.id;
     marker._poiData = node;
     marker._isCustom = isCustom;
 
-    // Click để chọn vào dropdown
-    marker.on('click', () => {
-      const fromSelect = document.getElementById('from-select');
-      const toSelect = document.getElementById('to-select');
+    // Click để chọn
+    marker.on('click', (e) => {
+      L.DomEvent.stopPropagation(e);
 
-      if (gpsMode) {
-        toSelect.value = node.id;
-        if (fromSelect.value && toSelect.value) {
-          findRoute();
-        }
+      if (editMode) return;
+
+      // Toggle expand: collapse all others, expand this one
+      document.querySelectorAll('.poi-pill.expanded').forEach(el => {
+        if (el.dataset.nodeId !== node.id) el.classList.remove('expanded');
+      });
+      const pillEl = document.querySelector(`.poi-pill[data-node-id="${node.id}"]`);
+      if (pillEl) {
+        pillEl.classList.add('expanded');
+        pillEl.classList.remove('tapped');
+        void pillEl.offsetWidth;
+        pillEl.classList.add('tapped');
+      }
+
+      // Switch floor nếu POI ở tầng khác
+      if (node.floor !== currentFloor) {
+        switchFloor(node.floor);
+      }
+
+      // GPS mode: always set as destination
+      if (gpsMode && gpsNode) {
+        selectPOI(node, 'to');
         return;
       }
 
-      if (!fromSelect.value) {
-        fromSelect.value = node.id;
-      } else if (!toSelect.value || toSelect.value === node.id) {
-        toSelect.value = node.id;
+      if (selectionMode === 'from') {
+        selectPOI(node, 'from');
       } else {
-        fromSelect.value = node.id;
-        toSelect.value = '';
-      }
-
-      if (fromSelect.value && toSelect.value) {
-        findRoute();
+        selectPOI(node, 'to');
       }
     });
 
@@ -1384,23 +1405,37 @@ const App = (() => {
           deleteCustomNode(node.id);
         }
       });
-
-      // Kéo thả để điều chỉnh vị trí
-      marker.on('dragend', (e) => {
-        const pos = marker.getLatLng();
-        const customNode = customNodes.find(n => n.id === node.id);
-        if (customNode) {
-          customNode.x = Math.round(pos.lng);
-          customNode.y = Math.round(pos.lat);
-          marker._poiData = customNode;
-          saveCustomNodes();
-        }
-      });
     }
 
-    // Lưu ref
-    markerRefs[node.id] = { marker, node };
+    // Kéo thả để điều chỉnh vị trí (tất cả markers)
+    marker.on('dragend', (e) => {
+      const pos = marker.getLatLng();
+      const newX = Math.round(pos.lng);
+      const newY = Math.round(pos.lat);
 
+      // Cập nhật trong SAMPLE_POIS
+      const poi = SAMPLE_POIS.find(p => p.id === node.id);
+      if (poi) {
+        poi.x = newX;
+        poi.y = newY;
+        savePoiPosition(node.id, newX, newY);
+      }
+
+      // Cập nhật custom nodes
+      const customNode = customNodes.find(n => n.id === node.id);
+      if (customNode) {
+        customNode.x = newX;
+        customNode.y = newY;
+        saveCustomNodes();
+      }
+
+      marker._poiData = { ...marker._poiData, x: newX, y: newY };
+
+      // Hiển thị toạ độ mới
+      console.log(`📍 ${node.label} → x: ${newX}, y: ${newY} (T${displayFloor(node.floor)})`);
+    });
+
+    markerRefs[node.id] = { marker, node };
     return marker;
   }
 
@@ -1614,18 +1649,7 @@ const App = (() => {
 
   // --- Clear route ---
   function clearRoute() {
-    if (currentPathLayer) {
-      map.removeLayer(currentPathLayer);
-      currentPathLayer = null;
-    }
-    currentPath = null;
-    if (gpsMode && gpsNode) {
-      document.getElementById('from-select').value = 'gps';
-    } else {
-      document.getElementById('from-select').value = '';
-    }
-    document.getElementById('to-select').value = '';
-    document.getElementById('route-info').classList.add('hidden');
+    clearSelection();
   }
 
   // --- Add custom node (click on map in edit mode) ---
@@ -1719,6 +1743,34 @@ const App = (() => {
     } catch(e) {
       console.warn('Không thể load localStorage:', e);
     }
+  }
+
+  // --- Load saved POI position overrides ---
+  function loadPoiPositions() {
+    try {
+      const saved = localStorage.getItem(POI_POS_KEY);
+      if (saved) {
+        const overrides = JSON.parse(saved);
+        Object.keys(overrides).forEach(id => {
+          const poi = SAMPLE_POIS.find(p => p.id === id);
+          if (poi) {
+            poi.x = overrides[id].x;
+            poi.y = overrides[id].y;
+          }
+        });
+        console.log(`📍 Đã khôi phục ${Object.keys(overrides).length} vị trí POI`);
+      }
+    } catch(e) {}
+  }
+
+  // --- Save POI position override ---
+  function savePoiPosition(nodeId, x, y) {
+    try {
+      const saved = localStorage.getItem(POI_POS_KEY);
+      const overrides = saved ? JSON.parse(saved) : {};
+      overrides[nodeId] = { x, y };
+      localStorage.setItem(POI_POS_KEY, JSON.stringify(overrides));
+    } catch(e) {}
   }
 
   // --- Hiển thị danh sách điểm tự đánh dấu ---
@@ -1817,6 +1869,11 @@ const App = (() => {
       fromSelect.value = 'gps';
     }
 
+    // Update selection state
+    selectedFrom = gpsNode;
+    selectionMode = 'to';
+    updateFloatingHint();
+
     const toId = document.getElementById('to-select').value;
     if (toId) {
       findRoute();
@@ -1825,6 +1882,14 @@ const App = (() => {
 
   function setGpsMode(enabled) {
     gpsMode = enabled;
+
+    // Sync GPS toggle button
+    const gpsBtn = document.getElementById('gps-toggle-btn');
+    if (gpsBtn) gpsBtn.classList.toggle('active', enabled);
+
+    // Sync old checkbox
+    const gpsCheckbox = document.getElementById('gps-mode-toggle');
+    if (gpsCheckbox) gpsCheckbox.checked = enabled;
     const hint = document.getElementById('gps-mode-hint');
     if (hint) hint.classList.toggle('hidden', !gpsMode);
 
@@ -1837,8 +1902,11 @@ const App = (() => {
       if (gpsMarker) map.removeLayer(gpsMarker);
       gpsMarker = null;
       gpsNode = null;
+      selectionMode = 'from';
+      selectedFrom = null;
       updateGpsStatus();
       populateDropdowns();
+      updateFloatingHint();
       if (fromSelect && fromSelect.value === 'gps') fromSelect.value = '';
       return;
     }
@@ -1851,6 +1919,11 @@ const App = (() => {
     if (fromSelect) {
       fromSelect.value = 'gps';
     }
+
+    // GPS mode: from is locked, user only picks destination
+    selectedFrom = gpsNode;
+    selectionMode = 'to';
+    updateFloatingHint();
   }
 
   // --- Xuất tọa độ dạng JSON để gửi trợ lý ---
@@ -1879,15 +1952,348 @@ const App = (() => {
 
   // --- Refresh all markers ---
   function refreshMarkers() {
-    // Xoá markers cũ
     Object.keys(markerLayers).forEach(f => {
       markerLayers[f].forEach(m => map.removeLayer(m));
     });
     markerLayers = {};
-
-    // Đặt lại
     placeMarkers(map);
   }
+
+  // ============================================================
+  // MOBILE TAP-TO-SELECT + SEARCH + ROUTE CARD
+  // ============================================================
+
+  // --- Handle mobile tap on POI ---
+  function handleMobileTap(node) {
+    if (editMode) return;
+
+    // Bounce animation
+    const pillEl = document.querySelector(`.poi-pill[data-node-id="${node.id}"]`);
+    if (pillEl) {
+      pillEl.classList.remove('tapped');
+      void pillEl.offsetWidth;
+      pillEl.classList.add('tapped');
+    }
+
+    // Switch floor nếu POI ở tầng khác
+    if (node.floor !== currentFloor) {
+      switchFloor(node.floor);
+    }
+
+    // GPS mode: always set as destination
+    if (gpsMode && gpsNode) {
+      selectPOI(node, 'to');
+      return;
+    }
+
+    if (selectionMode === 'from') {
+      selectPOI(node, 'from');
+    } else {
+      selectPOI(node, 'to');
+    }
+  }
+
+  // --- Select a POI as from or to ---
+  function selectPOI(node, type) {
+    // Clear previous selection của type này
+    clearMarkerHighlight(type);
+
+    if (type === 'from') {
+      selectedFrom = node;
+      selectionMode = 'to';
+    } else {
+      selectedTo = node;
+    }
+
+    // Highlight marker
+    highlightMarker(node.id, type);
+
+    // Update floating hint
+    updateFloatingHint();
+
+    // Sync dropdowns (desktop fallback)
+    if (type === 'from') {
+      document.getElementById('from-select').value = node.id;
+    } else {
+      document.getElementById('to-select').value = node.id;
+    }
+
+    // Auto-find route nếu cả 2 đã chọn
+    if (selectedFrom && selectedTo) {
+      if (selectedFrom.id === selectedTo.id) {
+        clearSelection();
+        return;
+      }
+      autoFindRoute();
+    }
+  }
+
+  // --- Highlight marker ---
+  function highlightMarker(nodeId, type) {
+    const pillEl = document.querySelector(`.poi-pill[data-node-id="${nodeId}"]`);
+    if (pillEl) {
+      pillEl.classList.add(type === 'from' ? 'selected-from' : 'selected-to');
+    }
+  }
+
+  // --- Clear marker highlight ---
+  function clearMarkerHighlight(type) {
+    const cls = type === 'from' ? 'selected-from' : 'selected-to';
+    document.querySelectorAll(`.poi-pill.${cls}`).forEach(el => {
+      el.classList.remove(cls);
+    });
+  }
+
+  // --- Clear entire selection ---
+  function clearSelection() {
+    clearMarkerHighlight('from');
+    clearMarkerHighlight('to');
+    selectedFrom = null;
+    selectedTo = null;
+    selectionMode = 'from';
+
+    // Clear path
+    if (currentPathLayer) {
+      map.removeLayer(currentPathLayer);
+      currentPathLayer = null;
+    }
+    currentPath = null;
+
+    // Reset dropdowns
+    if (gpsMode && gpsNode) {
+      document.getElementById('from-select').value = 'gps';
+    } else {
+      document.getElementById('from-select').value = '';
+    }
+    document.getElementById('to-select').value = '';
+    document.getElementById('route-info').classList.add('hidden');
+
+    // Hide route card
+    hideRouteCard();
+
+    // Update hint
+    updateFloatingHint();
+  }
+
+  // --- Auto find route ---
+  function autoFindRoute() {
+    const allNodes = getAllNodes();
+    const g = buildGraph(allNodes);
+    const path = aStar(g, selectedFrom.id, selectedTo.id);
+
+    if (!path) {
+      showRouteCard(null, null);
+      return;
+    }
+
+    currentPath = path;
+    drawPath(path);
+    showRouteCard(path, g);
+    updateFloatingHint();
+  }
+
+  // --- Update floating hint text ---
+  function updateFloatingHint() {}
+
+  // --- Show route card ---
+  function showRouteCard(path, graph) {
+    const card = document.getElementById('route-card');
+    const content = document.getElementById('route-card-content');
+    if (!card || !content) return;
+
+    if (!path || !graph) {
+      content.innerHTML = `
+        <div style="text-align:center; padding:16px; color:#d32f2f; font-weight:600;">
+          ❌ Không tìm thấy đường đi
+        </div>
+      `;
+      card.classList.add('visible');
+      return;
+    }
+
+    const allNodes = getAllNodes();
+    const nodeMap = {};
+    allNodes.forEach(n => { nodeMap[n.id] = n; });
+
+    let totalWeight = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const edge = graph[path[i]]?.edges.find(e => e.to === path[i + 1]);
+      if (edge) totalWeight += edge.weight;
+    }
+
+    const timeMin = Math.max(1, Math.round(totalWeight / 80));
+
+    let html = `
+      <div class="route-card-header">
+        <div class="route-card-stats">
+          <div class="stat">🚶 ${totalWeight}m</div>
+          <div class="stat">⏱️ ~${timeMin} phút</div>
+        </div>
+        <div class="route-card-actions">
+          <button class="btn-card danger" onclick="App.clearSelection()">✕ Xoá</button>
+        </div>
+      </div>
+    `;
+
+    // Voucher
+    if (totalWeight > 50) {
+      const maxDiscounts = [20000, 30000, 50000, 70000, 100000];
+      const maxDiscount = maxDiscounts[Math.floor(Math.random() * maxDiscounts.length)];
+      const code = 'VCH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      html += `
+        <div class="voucher-banner">
+          <div class="voucher-icon">🎉</div>
+          <div class="voucher-body">
+            <div class="voucher-title">Bạn nhận được Voucher!</div>
+            <div class="voucher-desc">Giảm 25% tại quán cà phê (tối đa ${maxDiscount.toLocaleString('vi-VN')}đ)</div>
+            <div class="voucher-code">Mã: <strong>${code}</strong></div>
+            <div class="voucher-footnote">*Hiệu lực 24h, sử dụng 1 lần</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Steps
+    html += '<div class="route-card-steps">';
+    html += '<div class="steps-title">📍 Hướng dẫn</div>';
+
+    path.forEach((id, idx) => {
+      const node = nodeMap[id];
+      if (!node) return;
+
+      let markerCls = '';
+      let markerContent = '';
+      if (idx === 0) {
+        markerCls = 'start';
+        markerContent = '🟢';
+      } else if (idx === path.length - 1) {
+        markerCls = 'end';
+        markerContent = '🔴';
+      } else {
+        markerContent = idx;
+      }
+
+      html += `
+        <div class="route-step">
+          <div class="step-marker ${markerCls}">${markerContent}</div>
+          <div class="step-info">
+            <div class="step-label">${node.label}</div>
+            <div class="step-floor">Tầng ${displayFloor(node.floor)}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+
+    content.innerHTML = html;
+    card.classList.add('visible');
+  }
+
+  // --- Hide route card ---
+  function hideRouteCard() {
+    const card = document.getElementById('route-card');
+    if (card) card.classList.remove('visible');
+  }
+
+  // ============================================================
+  // SEARCH FUNCTIONALITY
+  // ============================================================
+
+  // --- Category mapping ---
+  const CATEGORY_KEYWORDS = {
+    gate:      ['gate', 'cửa'],
+    lounge:    ['phòng khách', 'vip', 'lounge', 'the sens', 'bông sen', 'sh airport', 'nam a bank', 'acv', 'vietcombank', 'techcombank'],
+    wc:        ['nhà vệ sinh', 'wc', 'phòng vệ sinh'],
+    elevator:  ['thang máy'],
+    escalator: ['thang cuốn'],
+    food:      ['cà phê', 'ăn nhanh', 'giải khát'],
+    baggage:   ['băng chuyền', 'hành lý'],
+    smoke:     ['hút thuốc', 'phòng hút'],
+  };
+
+  // --- Search POIs ---
+  function searchPOIs(query, category) {
+    const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const allNodes = getAllNodes();
+
+    return allNodes.filter(poi => {
+      if (poi.id === 'gps') return false;
+
+      const label = poi.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const matchesQuery = !q || label.includes(q);
+      const matchesCat = !category || (CATEGORY_KEYWORDS[category] || []).some(kw => label.includes(kw));
+
+      return matchesQuery && matchesCat;
+    }).slice(0, 10);
+  }
+
+  // --- Show search results ---
+  function showSearchResults(results) {
+    const container = document.getElementById('search-results');
+    if (!container) return;
+
+    if (results.length === 0) {
+      container.innerHTML = '<div class="search-empty">Không tìm thấy địa điểm</div>';
+      return;
+    }
+
+    const floorIcons = { 1: '🛂', 2: '🛍️', 3: '🛫' };
+
+    container.innerHTML = results.map(poi => `
+      <div class="search-result-item" data-node-id="${poi.id}">
+        <div class="result-icon">${floorIcons[poi.floor] || '📍'}</div>
+        <div class="result-info">
+          <div class="result-label">${poi.label}</div>
+          <div class="result-floor">Tầng ${displayFloor(poi.floor)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // --- Handle search result tap ---
+  function handleSearchResultTap(nodeId) {
+    const allNodes = getAllNodes();
+    const node = allNodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    // Close search overlay
+    closeSearchOverlay();
+
+    // Switch floor if needed
+    if (node.floor !== currentFloor) {
+      switchFloor(node.floor);
+    }
+
+    // Select POI
+    handleMobileTap(node);
+  }
+
+  // --- Open search overlay ---
+  function openSearchOverlay() {
+    const overlay = document.getElementById('mobile-search');
+    const input = document.getElementById('search-input');
+    if (overlay) overlay.classList.add('visible');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+    // Show all POIs initially
+    showSearchResults(getAllNodes().filter(n => n.id !== 'gps').slice(0, 8));
+    activeCategory = null;
+    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+  }
+
+  // --- Close search overlay ---
+  function closeSearchOverlay() {
+    const overlay = document.getElementById('mobile-search');
+    if (overlay) overlay.classList.remove('visible');
+    activeCategory = null;
+  }
+
+  // ============================================================
+  // END MOBILE FUNCTIONALITY
+  // ============================================================
 
   // --- Mobile panel toggle ---
   function setupPanelToggle() {
@@ -1990,18 +2396,11 @@ const App = (() => {
 
   function init() {
     map = initMap();
-
-    // Kiểm tra ảnh có tồn tại không
-    const hasImages = checkImagesExist();
-
-    if (hasImages) {
-      createFloorLayers(map);
-    } else {
-      createPlaceholderLayers(map);
-    }
+    createFloorLayers(map);
 
     // Khôi phục điểm đã lưu
     loadCustomNodes();
+    loadPoiPositions();
 
     // Đặt POI markers
     placeMarkers(map);
@@ -2029,13 +2428,26 @@ const App = (() => {
     document.getElementById('edit-mode-toggle').addEventListener('change', (e) => {
       editMode = e.target.checked;
       document.getElementById('edit-mode-hint').classList.toggle('hidden', !editMode);
-      map.dragging[editMode ? 'disable' : 'enable']();
     });
 
     // GPS mode toggle
-    document.getElementById('gps-mode-toggle').addEventListener('change', (e) => {
-      setGpsMode(e.target.checked);
-    });
+    const gpsToggleBtn = document.getElementById('gps-toggle-btn');
+    if (gpsToggleBtn) {
+      gpsToggleBtn.addEventListener('click', () => {
+        const newState = !gpsMode;
+        setGpsMode(newState);
+        gpsToggleBtn.classList.toggle('active', newState);
+      });
+    }
+
+    // Also keep old checkbox toggle for side panel
+    const gpsToggleOld = document.getElementById('gps-mode-toggle');
+    if (gpsToggleOld) {
+      gpsToggleOld.addEventListener('change', (e) => {
+        setGpsMode(e.target.checked);
+        if (gpsToggleBtn) gpsToggleBtn.classList.toggle('active', e.target.checked);
+      });
+    }
 
     // Click on map to add node
     map.on('click', addCustomNode);
@@ -2080,6 +2492,142 @@ const App = (() => {
       if (from && to) findRoute();
     });
 
+    // ============================================================
+    // MOBILE SEARCH & ROUTE CARD EVENT LISTENERS
+    // ============================================================
+
+    // Search trigger
+    const searchTrigger = document.getElementById('mobile-search-trigger');
+    if (searchTrigger) {
+      searchTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSearchOverlay();
+      });
+    }
+
+    // Search close
+    const searchClose = document.getElementById('search-close');
+    if (searchClose) {
+      searchClose.addEventListener('click', closeSearchOverlay);
+    }
+
+    // Search input
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value;
+        const results = searchPOIs(query, activeCategory);
+        showSearchResults(results);
+      });
+    }
+
+    // Category chips
+    const chipsContainer = document.getElementById('category-chips');
+    if (chipsContainer) {
+      chipsContainer.addEventListener('click', (e) => {
+        const chip = e.target.closest('.category-chip');
+        if (!chip) return;
+
+        const cat = chip.dataset.cat;
+
+        // Toggle category
+        if (activeCategory === cat) {
+          activeCategory = null;
+          chip.classList.remove('active');
+        } else {
+          chipsContainer.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+          activeCategory = cat;
+          chip.classList.add('active');
+        }
+
+        // Re-search
+        const query = searchInput ? searchInput.value : '';
+        const results = searchPOIs(query, activeCategory);
+        showSearchResults(results);
+      });
+    }
+
+    // Search result taps
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+      searchResults.addEventListener('click', (e) => {
+        const item = e.target.closest('.search-result-item');
+        if (!item) return;
+        handleSearchResultTap(item.dataset.nodeId);
+      });
+    }
+
+    // Route card drag-to-dismiss
+    const routeCard = document.getElementById('route-card');
+    if (routeCard) {
+      let touchStartY = 0;
+      let cardTranslateY = 0;
+
+      routeCard.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.drag-handle')) {
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      routeCard.addEventListener('touchmove', (e) => {
+        if (touchStartY === 0) return;
+        const dy = e.touches[0].clientY - touchStartY;
+        if (dy > 0) {
+          cardTranslateY = dy;
+          routeCard.style.transform = `translateY(${dy}px)`;
+        }
+      }, { passive: true });
+
+      routeCard.addEventListener('touchend', () => {
+        if (cardTranslateY > 80) {
+          clearSelection();
+        }
+        routeCard.style.transform = '';
+        touchStartY = 0;
+        cardTranslateY = 0;
+      }, { passive: true });
+    }
+
+    // Close search overlay on backdrop click
+    document.addEventListener('click', (e) => {
+      const overlay = document.getElementById('mobile-search');
+      if (overlay && overlay.classList.contains('visible')) {
+        if (!overlay.contains(e.target) && !searchTrigger?.contains(e.target)) {
+          closeSearchOverlay();
+        }
+      }
+    });
+
+    // Close search overlay on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSearchOverlay();
+      }
+    });
+
+    // Click on map (empty area) to dismiss selection hint on desktop
+    map.on('click', (e) => {
+      const isMobile = window.matchMedia('(max-width: 900px)').matches;
+      if (isMobile) return;
+
+      // Check if tapped near a POI (within 50px)
+      const allNodes = getAllNodes().filter(n => n.id !== 'gps');
+      let nearPOI = false;
+      for (const poi of allNodes) {
+        const dx = e.latlng.lng - poi.x;
+        const dy = e.latlng.lat - poi.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 50) {
+          nearPOI = true;
+          break;
+        }
+      }
+
+      // If not near any POI and nothing selected, show initial hint
+      if (!nearPOI && !selectedFrom && !selectedTo) {
+        updateFloatingHint();
+      }
+    });
+
     console.log('✅ App ready! Current floor:', currentFloor);
     console.log('📌 Cách đánh tọa độ:');
     console.log('   1. Bật "Chế độ đánh dấu"');
@@ -2108,6 +2656,7 @@ const App = (() => {
     switchFloor,
     findRoute,
     clearRoute,
+    clearSelection,
     addCustomNode,
     deleteCustomNode,
     exportCoords,
@@ -2116,5 +2665,7 @@ const App = (() => {
     getCurrentFloor: () => currentFloor,
     getCustomNodes: () => customNodes,
     getAllNodes,
+    getSelectedFrom: () => selectedFrom,
+    getSelectedTo: () => selectedTo,
   };
 })();

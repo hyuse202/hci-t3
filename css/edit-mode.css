@@ -1,5 +1,6 @@
 /* ==========================================
    edit-mode.css — Edit mode, custom points, GPS status, export
+   Airbnb-inspired: neutral tones, clean toggles
    ========================================== */
 
 .toggle-label {
@@ -13,12 +14,13 @@
 .toggle-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: var(--accent);
+  accent-color: var(--rausch);
 }
 
 .toggle-text {
   font-size: 13px;
   font-weight: 600;
+  color: var(--ink);
 }
 
 .hint {
@@ -32,9 +34,9 @@
   margin-top: var(--space-3);
   padding: 8px 10px;
   border-radius: var(--radius-sm);
-  background: rgba(30, 136, 229, 0.08);
-  border: 1px solid rgba(30, 136, 229, 0.2);
-  color: #1e4f86;
+  background: rgba(30, 136, 229, 0.06);
+  border: 1px solid rgba(30, 136, 229, 0.15);
+  color: #1565c0;
   font-size: 12px;
   font-weight: 600;
 }
@@ -44,7 +46,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: 6px 0;
-  border-bottom: 1px dashed rgba(31, 26, 22, 0.12);
+  border-bottom: 1px dashed var(--hairline-soft);
   font-size: 12px;
 }
 
@@ -82,9 +84,9 @@
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     monospace;
-  border: 1px solid var(--line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-sm);
   resize: vertical;
   min-height: 70px;
-  background: #f5f1ec;
+  background: var(--surface-soft);
 }

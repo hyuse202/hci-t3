@@ -8,6 +8,7 @@ import { SAMPLE_POIS } from './data.js';
 import { refreshMarkers, populateDropdowns, placeMarkers } from './markers.js';
 import { clearRoute } from './selection.js';
 import { setGpsLocation } from './gps.js';
+import { renderIcons } from './icons.js';
 
 // --- Add custom node (click on map in edit mode) ---
 export function addCustomNode(e) {
@@ -140,20 +141,21 @@ export function renderCustomPointsList() {
 
   let html = '';
   state.customNodes.forEach((node, idx) => {
-    const color = node.floor === 1 ? '#ff6b35'
-                : node.floor === 2 ? '#0066cc'
-                : '#28a745';
+    const color = node.floor === 1 ? '#ff385c'
+                : node.floor === 2 ? '#222222'
+                : '#6a6a6a';
     html += `
       <div class="custom-point-item">
         <span class="custom-point-index" style="--poi-color: ${color};">${idx + 1}</span>
         <span class="custom-point-name">
           ${node.label} <span class="muted">[T${displayFloor(node.floor)}]</span>
         </span>
-        <button class="icon-button" onclick="App.deleteCustomNode('${node.id}')" title="Xoá">✕</button>
+        <button class="icon-button" onclick="App.deleteCustomNode('${node.id}')" title="Xoá"><i data-lucide="x"></i></button>
       </div>
     `;
   });
   container.innerHTML = html;
+  renderIcons();
 
   const clearBtn = document.getElementById('clear-all-points-btn');
   if (clearBtn) clearBtn.style.display = 'block';
@@ -181,7 +183,7 @@ export function exportCoords() {
     try {
       navigator.clipboard.writeText(code);
       textarea.style.background = '#e8f5e9';
-      setTimeout(() => { textarea.style.background = '#f5f1ec'; }, 2000);
+      setTimeout(() => { textarea.style.background = '#f7f7f7'; }, 2000);
     } catch(e) {}
   }
 }

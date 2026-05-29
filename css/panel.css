@@ -1,5 +1,6 @@
 /* ==========================================
    panel.css — Side panel, form, backdrop
+   Airbnb-inspired: flat surfaces, hairline borders, rausch focus
    ========================================== */
 
 .side-panel {
@@ -9,31 +10,31 @@
   bottom: 0;
   width: var(--panel-w);
   z-index: 60;
-  background: var(--panel);
-  border-right: 1px solid var(--line);
+  background: var(--canvas);
+  border-right: 1px solid var(--hairline);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   overflow: hidden;
-  box-shadow: var(--shadow-1);
 }
 
 .panel-grip {
   display: none;
-  width: 38px;
+  width: 36px;
   height: 4px;
-  border-radius: 999px;
-  background: rgba(31, 26, 22, 0.2);
+  border-radius: var(--radius-full);
+  background: var(--hairline);
   align-self: center;
   margin-bottom: var(--space-3);
 }
 
 .panel-header h2 {
-  font-size: 18px;
+  font-size: 20px;
   font-family: var(--font-display);
   font-weight: 600;
   margin-bottom: 6px;
+  color: var(--ink);
 }
 
 .panel-header p {
@@ -49,11 +50,10 @@
 }
 
 .panel-section {
-  background: #fff;
-  border: 1px solid var(--line);
+  background: var(--canvas);
+  border: 1px solid var(--hairline-soft);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
 .panel-section h3 {
@@ -62,6 +62,7 @@
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: var(--space-4);
+  font-weight: 600;
 }
 
 /* --- Route form --- */
@@ -80,13 +81,12 @@
 .route-form select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
   font-size: 14px;
-  background: #fff;
-  transition:
-    border 0.2s,
-    box-shadow 0.2s;
+  font-family: var(--font-body);
+  background: var(--canvas);
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
 .route-form select + label {
@@ -95,8 +95,8 @@
 
 .route-form select:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--rausch);
+  box-shadow: 0 0 0 2px var(--rausch-soft);
 }
 
 /* --- Panel backdrop --- */

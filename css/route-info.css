@@ -1,21 +1,96 @@
 /* ==========================================
    route-info.css — Route details in panel
+   Airbnb-inspired: rausch accent, clean typography
    ========================================== */
 
 .route-info {
-  border-left: 3px solid var(--accent);
-  background: #fff7f2;
+  border-left: 3px solid var(--rausch);
+  background: var(--rausch-soft);
+}
+
+#route-info .route-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#route-info .route-info-toggle {
+  border: 1px solid var(--hairline);
+  background: var(--canvas);
+  color: var(--ink);
+  border-radius: var(--radius-full);
+  width: 40px;
+  height: 40px;
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+#route-info .route-info-toggle:active {
+  background: var(--surface-soft);
+}
+
+#route-info .route-info-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s;
+}
+
+#route-info.collapsed .route-info-toggle svg {
+  transform: rotate(180deg);
 }
 
 #route-details {
   font-size: 13px;
   line-height: 1.6;
-  color: #2c2621;
+  color: var(--ink);
+}
+
+#route-details .route-summary {
+  display: grid;
+  gap: 4px;
+}
+
+#route-details .route-detail-body {
+  margin-top: 6px;
+}
+
+#route-info.collapsed #route-details .route-detail-body {
+  display: none;
+}
+
+#route-details .route-steps-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#route-details .route-steps-list {
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+}
+
+#route-details .route-steps-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+#route-details .route-steps-list::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: var(--radius-full);
 }
 
 #route-details .step {
   padding: 4px 0;
-  border-bottom: 1px dashed rgba(31, 26, 22, 0.16);
+  border-bottom: 1px dashed var(--hairline-soft);
 }
 
 #route-details .step:last-child {

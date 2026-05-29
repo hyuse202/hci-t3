@@ -1,4 +1,4 @@
-# AGENT.MD — Ngữ cảnh dự án: Định tuyến nhà ga T3
+# AGENTS.MD — Ngữ cảnh dự án: Định tuyến nhà ga T3
 
 > File này mô tả toàn bộ kiến trúc, logic và quy ước của project cho AI agent.
 > Đọc kỹ trước khi thay đổi bất kỳ file nào.
@@ -13,6 +13,8 @@
 **Ngôn ngữ:** Vietnamese (UI), JavaScript (code comments cũng dùng tiếng Việt).
 **Stack:** Vanilla HTML + CSS + JavaScript, dùng **ES Modules** (`type="module"`), không dùng framework JS.
 
+**Visual Language:** Airbnb-inspired — Rausch `#ff385c` accent, Inter font, 8px radius, single-tier shadow, Lucide icons.
+
 ### Triển khai
 - **Netlify** (`netlify.toml`) và **Vercel** (`vercel.json`) đã được cấu hình.
 - Chạy local: `python3 -m http.server 5500` → `http://localhost:5500`
@@ -23,9 +25,9 @@
 
 ```
 hci-t3/
-├── index.html                # Trang duy nhất (SPA), load ES module
+├── index.html                # Trang duy nhất (SPA), load ES module + Lucide CDN
 ├── css/
-│   ├── tokens.css            # Design tokens (:root), reset, utilities
+│   ├── tokens.css            # Design tokens (:root), reset, utilities, Lucide SVG sizing
 │   ├── layout.css            # .layout container
 │   ├── topbar.css            # .topbar, .brand, .topbar-actions + responsive
 │   ├── panel.css             # .side-panel, .panel-*, .route-form, backdrop + responsive
@@ -51,6 +53,7 @@ hci-t3/
 │   ├── custom-nodes.js       # addCustomNode(), deleteCustomNode(), saveCustomNodes(), loadCustomNodes(), loadPoiPositions(), savePoiPosition(), exportCoords(), renderCustomPointsList()
 │   ├── search.js             # searchPOIs(), showSearchResults(), openSearchOverlay(), closeSearchOverlay(), setupSearchEvents()
 │   ├── ui.js                 # setupPanelToggle(), autoOpenPanel()
+│   ├── icons.js              # CATEGORY_ICONS (category→lucide map), FLOOR_ICONS, renderIcons()
 │   ├── sw-register.js        # registerServiceWorker()
 │   └── app.js                # Entry point: init(), event wiring, window.App public API
 ├── assets/
@@ -75,6 +78,7 @@ hci-t3/
 File `app.js` là entry point duy nhất, load qua `<script type="module">`. Nó:
 - Import tất cả modules
 - Khởi tạo app trong hàm `init()` (gọi khi `DOMContentLoaded`)
+- Gọi `renderIcons()` để render Lucide icons cho static HTML và markers
 - Expose public API qua `window.App`
 
 ### 3.2 Module dependencies
@@ -84,14 +88,15 @@ app.js (entry point)
 ├── config.js          (zero deps)
 ├── data.js            (zero deps)
 ├── state.js           (zero deps)
+├── icons.js           (zero deps — uses global window.lucide from CDN)
 ├── pathfinding.js     ← config.js
 ├── map.js             ← config.js, state.js, route.js
-├── markers.js         ← config.js, state.js, data.js, selection.js, custom-nodes.js, map.js
+├── markers.js         ← config.js, state.js, data.js, selection.js, custom-nodes.js, map.js, icons.js
 ├── selection.js       ← state.js, markers.js, pathfinding.js, route.js, map.js
-├── route.js           ← config.js, state.js, markers.js, pathfinding.js, ui.js
+├── route.js           ← config.js, state.js, markers.js, pathfinding.js, ui.js, icons.js
 ├── gps.js             ← config.js, state.js, markers.js, selection.js, route.js
-├── custom-nodes.js    ← config.js, state.js, data.js, markers.js, selection.js, gps.js
-├── search.js          ← config.js, state.js, data.js, markers.js, map.js, selection.js
+├── custom-nodes.js    ← config.js, state.js, data.js, markers.js, selection.js, gps.js, icons.js
+├── search.js          ← config.js, state.js, data.js, markers.js, map.js, selection.js, icons.js
 ├── ui.js              (zero deps)
 └── sw-register.js     (zero deps)
 ```
@@ -137,10 +142,12 @@ Mảng `SAMPLE_POIS` (~961 dòng, 104 nodes). Cấu trúc mỗi node:
 
 ```js
 {
-  id: 'poi-1', label: '🚻 Tên', x: 540, y: 663, floor: 1,
+  id: 'poi-1', label: 'Nhà vệ sinh', x: 540, y: 663, floor: 1,
   links: [{ to: 'poi-2', weight: 15 }],  // weight = mét
 }
 ```
+
+Label là text thuần → `markers.js` suy luận category dựa trên keyword, rồi tra `CATEGORY_ICONS` trong `icons.js` để lấy Lucide icon name.
 
 **Phân bổ node theo tầng:**
 | Internal | Hiển thị | ID range | Nội dung |
@@ -151,7 +158,25 @@ Mảng `SAMPLE_POIS` (~961 dòng, 104 nodes). Cấu trúc mỗi node:
 
 `CATEGORY_KEYWORDS` map dùng cho tìm kiếm theo danh mục.
 
-### 3.6 Public API (`window.App`)
+### 3.6 Icons (`js/icons.js`)
+
+Module cung cấp:
+- `CATEGORY_ICONS`: Map category → Lucide icon name (dùng cho POI markers)
+- `FLOOR_ICONS`: Map floor number → Lucide icon name (dùng cho search results)
+- `renderIcons()`: Wrapper gọi `window.lucide.createIcons()` để quét DOM, thay `<i data-lucide="...">` bằng SVG
+
+```js
+export const CATEGORY_ICONS = {
+  gate: 'door-open', lounge: 'armchair', wc: 'droplets',
+  elevator: 'arrow-up-down', escalator: 'chevrons-up', food: 'coffee',
+  baggage: 'luggage', smoke: 'cigarette-off', checkin: 'clipboard-check',
+  stairs: 'door-open', custom: 'map-pin', other: 'map-pin',
+};
+```
+
+**Quy tắc:** Sau khi set `innerHTML` chứa `<i data-lucide>`, phải gọi `renderIcons()`.
+
+### 3.7 Public API (`window.App`)
 
 ```js
 window.App = {
@@ -192,30 +217,40 @@ Leaflet [lat, lng]  ↔  Pixel [y, x]
 ### Design tokens (`css/tokens.css`, `:root`)
 
 ```css
---font-display: "Instrument Serif", serif;
---font-body: "Hanken Grotesk", sans-serif;
---paper: #ffffff; --panel: #ffffff; --ink: #1f1a16; --muted: #6f675f;
---line: rgba(31, 26, 22, 0.12);
---accent: #ff6b35; --accent-strong: #e15423; --accent-soft: rgba(255, 107, 53, 0.18);
---topbar-h: 66px; --panel-w: 360px; --sheet-peek: 74px;
+--font-display: "Inter", sans-serif;
+--font-body: "Inter", sans-serif;
+
+--rausch: #ff385c; --rausch-active: #e00b41; --rausch-disabled: #ffd1da;
+--rausch-soft: rgba(255, 56, 92, 0.10);
+
+--canvas: #ffffff;  --surface-soft: #f7f7f7;  --surface-strong: #f2f2f2;
+--hairline: #dddddd;  --hairline-soft: #ebebeb;
+--ink: #222222;  --body: #3f3f3f;  --muted: #6a6a6a;  --muted-soft: #929292;
+--on-primary: #ffffff;  --error: #c13515;
+
+--shadow-card: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px;
+
+--radius-full: 9999px;  --radius-lg: 14px;  --radius-md: 8px;  --radius-sm: 8px;
+
+--topbar-h: 80px;  --panel-w: 360px;  --sheet-peek: 74px;
 ```
 
 ### Màu marker theo tầng
 
-| Floor (internal) | Màu |
-|---|---|
-| 1 (Tầng 2) | `#ff6b35` (cam) |
-| 2 (Tầng 3) | `#0066cc` (xanh dương) |
-| 3 (Tầng 4) | `#28a745` (xanh lá) |
+| Floor (internal) | Màu | Lucide icon |
+|---|---|---|
+| 1 (Tầng 2) | `#ff385c` (Rausch) | `shield-check` |
+| 2 (Tầng 3) | `#222222` (Ink) | `shopping-bag` |
+| 3 (Tầng 4) | `#6a6a6a` (Muted) | `plane-takeoff` |
 
 ### Responsive breakpoints
 
 | Breakpoint | Thay đổi chính |
 |---|---|
 | `≤ 1100px` | `--panel-w: 320px` |
-| `≤ 900px` | Panel ẩn, topbar compact, mobile search hiện, POI markers larger |
+| `≤ 900px` | Panel ẩn, topbar 64px, mobile search hiện, POI markers larger |
 | `≤ 600px` | Search/card sizing nhỏ hơn, safe-area-inset |
-| `≥ 901px` | Panel ẩn, topbar compact, search/gps hiện, hover states |
+| `≥ 901px` | Panel ẩn, topbar 80px, search/gps hiện, hover states |
 
 Mỗi CSS file chứa responsive overrides cho component đó (không gom cuối file).
 
@@ -228,8 +263,12 @@ Mỗi CSS file chứa responsive overrides cho component đó (không gom cuối
 ## 6. HTML — `index.html`
 
 ```html
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script type="module" src="js/app.js"></script>
 ```
+
+Lucide load trước ES modules (sync script), nên `window.lucide` available khi modules chạy.
 
 13 `<link>` CSS tags theo thứ tự: tokens → layout → topbar → panel → buttons → route-info → voucher → edit-mode → map → markers → floor-tabs → search → route-card.
 
@@ -237,8 +276,8 @@ Mỗi CSS file chứa responsive overrides cho component đó (không gom cuối
 
 ## 7. PWA
 
-- **manifest.json**: `display: standalone`, portrait, theme `#f7f3ef`
-- **service-worker.js**: `CACHE_NAME = 't3-shell-v2'`. Cache-first cho shell (tất cả CSS/JS/icon files), network-first cho `assets/floor-*.png`
+- **manifest.json**: `display: standalone`, portrait, theme `#ffffff`
+- **service-worker.js**: `CACHE_NAME = 't3-shell-v7'`. Cache-first cho shell (tất cả CSS/JS/icon files), network-first cho `assets/floor-*.png`
 - **Cài đặt iOS**: `apple-mobile-web-app-capable`, `apple-touch-icon`
 - SW chỉ hoạt động trên `http://localhost` hoặc `https`
 
@@ -251,6 +290,7 @@ Mỗi CSS file chứa responsive overrides cho component đó (không gom cuối
 2. Đặt `id` theo pattern `poi-{number}` (không trùng)
 3. Cung cấp `links[]` kết nối với node lân cận cùng tầng hoặc liên tầng
 4. `weight` = khoảng cách mét ước tính
+5. Đảm bảo label chứa keyword phù hợp trong `CATEGORY_KEYWORDS` (để marker suy luận category). Nếu cần icon riêng, thêm vào `CATEGORY_ICONS` trong `js/icons.js`
 
 ### Thêm tầng mới
 Hiện tại hardcode 3 tầng. Để thêm tầng 4+:
@@ -258,6 +298,7 @@ Hiện tại hardcode 3 tầng. Để thêm tầng 4+:
 - Thêm nút `.floor-btn` trong HTML
 - Thêm màu trong `js/markers.js` (createPOIMarker) và `js/custom-nodes.js` (renderCustomPointsList)
 - Thêm màu placeholder trong `js/map.js` (createPlaceholderLayers)
+- Thêm icon vào `FLOOR_ICONS` trong `js/icons.js`
 
 ### Đổi kích thước ảnh
 Sửa `CONFIG.imageWidth` và `CONFIG.imageHeight` trong `js/config.js` — ảnh hưởng đến bounds Leaflet và placeholder labels.
@@ -270,6 +311,11 @@ Sửa `CONFIG.imageWidth` và `CONFIG.imageHeight` trong `js/config.js` — ản
 
 ### Thêm CSS mới
 Mỗi component có file CSS riêng. Thêm file mới → thêm `<link>` vào `index.html` → thêm vào `APP_SHELL` trong `service-worker.js` → bump `CACHE_NAME`.
+
+### Thêm Lucide icon mới
+1. Kiểm tra icon có trong Lucide library: https://lucide.dev/icons/
+2. Dùng `<i data-lucide="icon-name"></i>` trong HTML
+3. Sau `innerHTML` dynamic, gọi `renderIcons()` từ `js/icons.js`
 
 ### Lưu ý Leaflet CRS.Simple
 - **Không dùng lat/lng địa lý**. Mọi tọa độ là pixel của ảnh.
@@ -288,7 +334,8 @@ Mỗi component có file CSS riêng. Thêm file mới → thêm `<link>` vào `i
 | Thư viện | Version | Dùng cho |
 |---|---|---|
 | Leaflet.js | 1.9.4 | Bản đồ ảnh phẳng, markers, polyline |
-| Google Fonts | — | Hanken Grotesk + Instrument Serif |
+| Google Fonts | — | Inter (400/500/600/700) |
+| Lucide Icons | latest | SVG icon library (vanilla JS) |
 
 Không có package.json, không có build step, không có bundler.
 
@@ -304,6 +351,7 @@ User chọn điểm đi + đến
     → drawPath(path)                 [js/route.js] ← polyline chỉ vẽ segment cùng floor
     → showRouteInfo(path, graph)     [js/route.js] ← tổng mét, thời gian, voucher nếu >50m
     → showRouteCard(path, graph)     [js/route.js] ← mobile route card
+    → renderIcons()                  [js/icons.js] ← render Lucide SVGs trong dynamic HTML
 ```
 
 Khi chuyển tầng:

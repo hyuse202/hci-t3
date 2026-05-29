@@ -1,5 +1,6 @@
 /* ==========================================
    voucher.css — Voucher banner (gamification)
+   Airbnb-inspired: Rausch pink gradient
    ========================================== */
 
 .voucher-banner {
@@ -8,14 +9,23 @@
   gap: 10px;
   margin: 10px 0 6px;
   padding: 10px 12px;
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  border: 1px solid #ffcc80;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #fff0f3, #ffd1da);
+  border: 1px solid var(--rausch-disabled);
+  border-radius: var(--radius-lg);
 }
 
 .voucher-icon {
   font-size: 28px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voucher-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--rausch);
 }
 
 .voucher-body {
@@ -25,20 +35,20 @@
 .voucher-title {
   font-weight: 700;
   font-size: 13px;
-  color: #e65100;
+  color: var(--rausch);
   margin-bottom: 2px;
 }
 
 .voucher-desc {
   font-size: 11px;
-  color: #bf360c;
+  color: var(--rausch-active);
   line-height: 1.4;
 }
 
 .voucher-code {
   margin-top: 4px;
   font-size: 12px;
-  color: #e65100;
+  color: var(--rausch);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.5px;
 }
@@ -46,6 +56,6 @@
 .voucher-footnote {
   margin-top: 2px;
   font-size: 9px;
-  color: #a1887f;
+  color: var(--muted-soft);
   font-style: italic;
 }

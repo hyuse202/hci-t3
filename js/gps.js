@@ -1,12 +1,15 @@
 /**
- * gps.js — GPS simulation mode
+ * gps.js — GPS simulation mode + first-visit onboarding
  */
 
-import { displayFloor } from './config.js';
+import { displayFloor, STORAGE_KEY } from './config.js';
 import { state } from './state.js';
 import { populateDropdowns } from './markers.js';
 import { updateFloatingHint } from './selection.js';
 import { findRoute } from './route.js';
+import { renderIcons } from './icons.js';
+
+const GPS_ASKED_KEY = 'hci-t3-gps-asked';
 
 function createGpsMarker(node) {
   const icon = L.divIcon({
@@ -117,4 +120,44 @@ export function setGpsMode(enabled) {
   state.selectedFrom = state.gpsNode;
   state.selectionMode = 'to';
   updateFloatingHint();
+}
+
+// --- First-visit GPS onboarding ---
+export function requestGpsPermission() {
+  // Already asked before? Skip.
+  if (localStorage.getItem(GPS_ASKED_KEY)) return;
+
+  const overlay = document.getElementById('gps-onboarding');
+  if (!overlay) return;
+
+  // Show overlay with animation
+  requestAnimationFrame(() => {
+    overlay.classList.add('visible');
+    renderIcons();
+  });
+
+  const allowBtn = document.getElementById('gps-allow-btn');
+  const skipBtn = document.getElementById('gps-skip-btn');
+
+  function dismiss() {
+    overlay.classList.remove('visible');
+    localStorage.setItem(GPS_ASKED_KEY, '1');
+    allowBtn?.removeEventListener('click', onAllow);
+    skipBtn?.removeEventListener('click', onSkip);
+  }
+
+  function onAllow() {
+    dismiss();
+    // Enable GPS simulation at map center
+    setGpsMode(true);
+    // Auto-open search so user can find their destination
+    import('./search.js').then(m => m.openSearchOverlay());
+  }
+
+  function onSkip() {
+    dismiss();
+  }
+
+  allowBtn?.addEventListener('click', onAllow);
+  skipBtn?.addEventListener('click', onSkip);
 }

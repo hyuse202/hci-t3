@@ -7,12 +7,14 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=Instrument+Serif:opsz,wght@8..72,400;8..72,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -27,8 +29,9 @@
   <link rel="stylesheet" href="css/floor-tabs.css" />
   <link rel="stylesheet" href="css/search.css" />
   <link rel="stylesheet" href="css/route-card.css" />
+  <link rel="stylesheet" href="css/gps-onboarding.css" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#f7f3ef" />
+  <meta name="theme-color" content="#ffffff" />
 
   <!-- iOS Add to Home Screen -->
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
@@ -48,11 +51,11 @@
     </div>
     <div class="topbar-actions">
       <div class="mobile-search-trigger" id="mobile-search-trigger">
-        <span class="search-icon">🔍</span>
+        <i data-lucide="search" class="search-icon"></i>
         <span class="search-text">Tìm điểm đến...</span>
       </div>
       <button class="gps-toggle-btn" id="gps-toggle-btn" title="Bật GPS giả lập">
-        <span class="gps-icon">📡</span>
+        <i data-lucide="satellite-dish" class="gps-icon"></i>
       </button>
     </div>
   </header>
@@ -61,17 +64,17 @@
   <div class="mobile-search-overlay" id="mobile-search">
     <div class="search-bar">
       <input type="text" id="search-input" placeholder="Nhập tên địa điểm..." autocomplete="off" />
-      <button class="search-close" id="search-close">✕</button>
+      <button class="search-close" id="search-close"><i data-lucide="x"></i></button>
     </div>
     <div class="category-chips" id="category-chips">
-      <button class="category-chip" data-cat="gate">✈️ Gates</button>
-      <button class="category-chip" data-cat="lounge">🛋️ Lounge</button>
-      <button class="category-chip" data-cat="wc">🚻 WC</button>
-      <button class="category-chip" data-cat="elevator">🛗 Thang máy</button>
-      <button class="category-chip" data-cat="escalator">🔼 Thang cuốn</button>
-      <button class="category-chip" data-cat="food">☕ Ăn uống</button>
-      <button class="category-chip" data-cat="baggage">🛄 Hành lý</button>
-      <button class="category-chip" data-cat="smoke">🚬 Hút thuốc</button>
+      <button class="category-chip" data-cat="gate"><i data-lucide="plane"></i> Gates</button>
+      <button class="category-chip" data-cat="lounge"><i data-lucide="sofa"></i> Lounge</button>
+      <button class="category-chip" data-cat="wc"><i data-lucide="droplets"></i> WC</button>
+      <button class="category-chip" data-cat="elevator"><i data-lucide="arrow-up-down"></i> Thang máy</button>
+      <button class="category-chip" data-cat="escalator"><i data-lucide="chevrons-up"></i> Thang cuốn</button>
+      <button class="category-chip" data-cat="food"><i data-lucide="coffee"></i> Ăn uống</button>
+      <button class="category-chip" data-cat="baggage"><i data-lucide="luggage"></i> Hành lý</button>
+      <button class="category-chip" data-cat="smoke"><i data-lucide="cigarette-off"></i> Hút thuốc</button>
     </div>
     <div class="search-results" id="search-results"></div>
   </div>
@@ -90,7 +93,7 @@
 
       <div class="panel-scroll">
         <section class="panel-section">
-          <h3>📍 Chọn tuyến</h3>
+          <h3><i data-lucide="map-pin" style="width:14px;height:14px;"></i> Chọn tuyến</h3>
           <div class="route-form">
             <div class="route-field route-field--from">
               <label>Điểm đi</label>
@@ -104,13 +107,13 @@
               <option value="">— Chọn điểm đến —</option>
             </select>
 
-            <button id="find-route-btn" class="btn btn-primary">🚶 Tìm đường</button>
-            <button id="clear-route-btn" class="btn btn-secondary">🗑️ Xoá</button>
+            <button id="find-route-btn" class="btn btn-primary"><i data-lucide="footprints"></i> Tìm đường</button>
+            <button id="clear-route-btn" class="btn btn-secondary"><i data-lucide="trash-2"></i> Xoá</button>
           </div>
         </section>
 
         <section class="panel-section" id="gps-section">
-          <h3>📡 GPS</h3>
+          <h3><i data-lucide="satellite-dish" style="width:14px;height:14px;"></i> GPS</h3>
           <label class="toggle-label">
             <input type="checkbox" id="gps-mode-toggle" />
             <span class="toggle-text">Bật GPS</span>
@@ -122,15 +125,20 @@
         </section>
 
         <section id="route-info" class="panel-section route-info hidden">
-          <h3>📋 Chi tiết tuyến</h3>
+          <div class="route-info-header">
+            <h3><i data-lucide="clipboard-list" style="width:14px;height:14px;"></i> Chi tiết tuyến</h3>
+            <button class="route-info-toggle" id="route-info-toggle" type="button" aria-expanded="true" title="Thu gọn">
+              <i data-lucide="chevrons-down"></i>
+            </button>
+          </div>
           <div id="route-details"></div>
         </section>
 
         <section class="panel-section">
-          <h3>⚙️ Chế độ</h3>
+          <h3><i data-lucide="settings" style="width:14px;height:14px;"></i> Chế độ</h3>
           <label class="toggle-label">
             <input type="checkbox" id="edit-mode-toggle" />
-            <span class="toggle-text">🖊️ Chế độ đánh dấu</span>
+            <span class="toggle-text"><i data-lucide="pencil" style="width:14px;height:14px;"></i> Chế độ đánh dấu</span>
           </label>
           <p id="edit-mode-hint" class="hint hidden">
             Click vào bản đồ để thêm điểm mới.<br />
@@ -140,15 +148,15 @@
         </section>
 
         <section class="panel-section hidden" id="manage-points-section">
-          <h3>📌 Quản lý điểm</h3>
+          <h3><i data-lucide="pin" style="width:14px;height:14px;"></i> Quản lý điểm</h3>
           <div id="custom-points-list">
             <p class="hint">Chưa có điểm tự đánh dấu.</p>
           </div>
           <button id="clear-all-points-btn" class="btn btn-secondary btn-small" style="display: none;">
-            🗑️ Xoá tất cả điểm đã đánh
+            <i data-lucide="trash-2"></i> Xoá tất cả điểm đã đánh
           </button>
           <button id="export-coords-btn" class="btn btn-ghost btn-small" style="display: none;">
-            📋 Sao chép tọa độ cho trợ lý
+            <i data-lucide="clipboard-list"></i> Sao chép tọa độ cho trợ lý
           </button>
           <textarea id="export-textarea" class="export-textarea" readonly style="display: none;"></textarea>
         </section>
@@ -165,15 +173,26 @@
 
   <!-- Floating Floor Tabs -->
   <div class="floor-tabs-bottom" id="floor-tabs">
-    <button class="floor-btn active" data-floor="1">Tầng 2 🛂</button>
-    <button class="floor-btn" data-floor="2">Tầng 3 🛍️</button>
-    <button class="floor-btn" data-floor="3">Tầng 4 🛫</button>
+    <button class="floor-btn active" data-floor="1"><i data-lucide="shield-check"></i> Tầng 2</button>
+    <button class="floor-btn" data-floor="2"><i data-lucide="shopping-bag"></i> Tầng 3</button>
+    <button class="floor-btn" data-floor="3"><i data-lucide="plane-takeoff"></i> Tầng 4</button>
   </div>
 
   <!-- Route Card -->
   <div class="route-card" id="route-card">
     <div class="drag-handle"></div>
     <div class="route-card-content" id="route-card-content"></div>
+  </div>
+
+  <!-- GPS Onboarding (first visit) -->
+  <div class="gps-onboarding" id="gps-onboarding">
+    <div class="gps-onboarding-card">
+      <div class="onboarding-icon"><i data-lucide="locate"></i></div>
+      <h3>Cho phép định vị?</h3>
+      <p>Để tìm đường nhanh nhất, hãy cho phép truy cập vị trí hiện tại của bạn trong nhà ga.</p>
+      <button id="gps-allow-btn" class="btn btn-primary"><i data-lucide="locate" style="width:16px;height:16px;"></i> Cho phép</button>
+      <button id="gps-skip-btn" class="btn btn-ghost btn-small">Bỏ qua</button>
+    </div>
   </div>
 
   <!-- JavaScript (ES modules) -->

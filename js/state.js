@@ -16,6 +16,7 @@ export const state = {
   customNodes: [],
   currentPath: null,
   currentPathLayer: null,
+  currentPathArrowLayer: null,
   markerLayers: {},
   floorLayers: {},
   currentFloorLayer: null,

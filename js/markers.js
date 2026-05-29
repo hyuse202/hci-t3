@@ -4,10 +4,11 @@
 
 import { displayFloor } from './config.js';
 import { state } from './state.js';
-import { SAMPLE_POIS } from './data.js';
+import { CATEGORY_KEYWORDS, SAMPLE_POIS } from './data.js';
 import { selectPOI } from './selection.js';
 import { deleteCustomNode, saveCustomNodes, savePoiPosition } from './custom-nodes.js';
 import { switchFloor } from './map.js';
+import { CATEGORY_ICONS, renderIcons } from './icons.js';
 
 // --- Get all nodes (mẫu + custom) ---
 export function getAllNodes() {
@@ -23,23 +24,60 @@ export function getAllNodes() {
   return combined;
 }
 
+const CATEGORY_COLORS = {
+  gate: '#ff385c',
+  lounge: '#6f4cff',
+  wc: '#1e88e5',
+  elevator: '#222222',
+  escalator: '#00a699',
+  food: '#f59f00',
+  baggage: '#4c6ef5',
+  smoke: '#6a6a6a',
+  checkin: '#0ea5e9',
+  stairs: '#4b5563',
+  custom: '#6a6a6a',
+  other: '#222222',
+};
+
+function normalizeText(value) {
+  return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function matchesCategory(normalizedLabel, keywords) {
+  return keywords.some(keyword => normalizedLabel.includes(normalizeText(keyword)));
+}
+
+function getCategoryForLabel(label) {
+  const trimmed = label.trim();
+  const normalized = normalizeText(trimmed);
+
+  if (/^(a|d)\d+/i.test(trimmed)) return 'gate';
+  if (normalized.includes('thang bo')) return 'stairs';
+  if (normalized.includes('thu tuc')) return 'checkin';
+
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (matchesCategory(normalized, keywords)) return category;
+  }
+
+  return 'other';
+}
+
 // --- Create Marker for a POI ---
 export function createPOIMarker(node, map) {
   if (node.id === 'gps') return null;
-  const color = node.floor === 1 ? '#ff6b35'
-             : node.floor === 2 ? '#0066cc'
-             : '#28a745';
 
   const isCustom = node.id.startsWith('custom-');
 
-  const iconEmoji = node.label.match(/^[\p{Emoji}\p{Emoji_Component}]+/u)?.[0] || '📍';
-  const shortLabel = node.label.replace(/^[\p{Emoji}\p{Emoji_Component}]+\s*/u, '');
+  const shortLabel = node.label.replace(/^[\p{Emoji}\p{Emoji_Component}]+\s*/u, '').trim();
+  const category = isCustom ? 'custom' : getCategoryForLabel(shortLabel || node.label);
+  const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
+  const lucideName = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
 
   const icon = L.divIcon({
     className: 'poi-marker',
     html: `
       <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};" data-node-id="${node.id}" data-label="${shortLabel}">
-        <span class="pill-icon">${iconEmoji}</span>
+        <span class="pill-icon"><i data-lucide="${lucideName}"></i></span>
         <span class="pill-label">${shortLabel}</span>
       </div>
     `,
@@ -145,6 +183,9 @@ export function placeMarkers(map) {
       marker.addTo(map);
     }
   });
+
+  // Render Lucide icons inside marker pills
+  renderIcons();
 }
 
 // --- Refresh all markers ---
@@ -154,6 +195,7 @@ export function refreshMarkers() {
   });
   state.markerLayers = {};
   placeMarkers(state.map);
+  renderIcons();
 }
 
 // --- Populate dropdowns ---

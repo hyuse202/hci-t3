@@ -1,4 +1,4 @@
-const CACHE_NAME = 't3-shell-v2';
+const CACHE_NAME = 't3-shell-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -16,7 +16,9 @@ const APP_SHELL = [
   './css/floor-tabs.css',
   './css/search.css',
   './css/route-card.css',
+  './css/gps-onboarding.css',
   // JS modules
+  './js/icons.js',
   './js/config.js',
   './js/data.js',
   './js/state.js',

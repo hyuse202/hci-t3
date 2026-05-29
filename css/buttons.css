@@ -1,54 +1,78 @@
 /* ==========================================
    buttons.css — Button styles, icon buttons, toggles
+   Airbnb-inspired: 8px radius, Rausch primary, 48px touch targets
    ========================================== */
 
 .btn {
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   font-family: var(--font-body);
-  transition: all 0.2s;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-primary {
   width: 100%;
   margin-top: var(--space-4);
-  background: var(--accent);
-  color: #fff;
+  background: var(--rausch);
+  color: var(--on-primary);
   border-color: transparent;
+  font-weight: 500;
 }
 
 .btn-primary:hover {
-  background: var(--accent-strong);
+  background: var(--rausch-active);
+}
+
+.btn-primary:active {
+  background: var(--rausch-active);
+}
+
+.btn-primary:disabled {
+  background: var(--rausch-disabled);
+  cursor: not-allowed;
 }
 
 .btn-secondary {
   width: 100%;
   margin-top: var(--space-3);
-  background: #ede7df;
-  color: #3f362f;
-  border-color: rgba(63, 54, 47, 0.12);
+  background: var(--canvas);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
 }
 
 .btn-secondary:hover {
-  background: #e2dbd2;
+  background: var(--surface-soft);
 }
 
 .btn-ghost {
   background: transparent;
-  border-color: var(--line);
+  border: 1px solid var(--hairline);
   color: var(--ink);
 }
 
 .btn-ghost:hover {
   border-color: var(--ink);
+  background: var(--surface-soft);
 }
 
 .btn-small {
   font-size: 12px;
-  padding: 8px 10px;
+  padding: 8px 12px;
+  min-height: 36px;
 }
 
 .btn-ghost.btn-small {
@@ -59,7 +83,12 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #c2410c;
+  color: var(--muted);
   font-size: 16px;
   padding: 0 4px;
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

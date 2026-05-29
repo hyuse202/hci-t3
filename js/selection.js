@@ -5,7 +5,7 @@
 import { state } from './state.js';
 import { getAllNodes } from './markers.js';
 import { buildGraph, aStar } from './pathfinding.js';
-import { drawPath, showRouteCard, hideRouteCard } from './route.js';
+import { clearRouteArrows, drawPath, showRouteCard, hideRouteCard } from './route.js';
 import { switchFloor } from './map.js';
 
 // --- Handle mobile tap on POI ---
@@ -98,6 +98,7 @@ export function clearSelection() {
     state.map.removeLayer(state.currentPathLayer);
     state.currentPathLayer = null;
   }
+  clearRouteArrows();
   state.currentPath = null;
 
   // Reset dropdowns

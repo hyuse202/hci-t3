@@ -3,7 +3,7 @@
  *
  * Cấu trúc mỗi node:
  *   id: string duy nhất
- *   label: tên hiển thị (có emoji)
+ *   label: tên hiển thị
  *   x, y: tọa độ pixel trên ảnh
  *   floor: 1 | 2 | 3 (internal)
  *   links: mảng kết nối { to, weight (mét) }
@@ -13,7 +13,7 @@ export const SAMPLE_POIS = [
   // ===== TẦNG 2 (internal floor 1) — Dữ liệu thật từ sơ đồ ga T3 =====
   {
     id: 'poi-1',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 99, y: 698,
     floor: 1,
     links: [
@@ -24,7 +24,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-2',
-    label: '🚬 Phòng hút thuốc',
+    label: 'Phòng hút thuốc',
     x: 122, y: 643,
     floor: 1,
     links: [
@@ -34,7 +34,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-3',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 98, y: 663,
     floor: 1,
     links: [
@@ -46,7 +46,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-4',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 340, y: 728,
     floor: 1,
     links: [
@@ -56,7 +56,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-5',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 290, y: 675,
     floor: 1,
     links: [
@@ -68,7 +68,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-6',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 370, y: 624,
     floor: 1,
     links: [
@@ -78,7 +78,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-7',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 333, y: 607,
     floor: 1,
     links: [
@@ -88,7 +88,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-8',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 564, y: 709,
     floor: 1,
     links: [
@@ -99,7 +99,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-9',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 560, y: 680,
     floor: 1,
     links: [
@@ -109,7 +109,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-10',
-    label: '🚬 Phòng hút thuốc lá',
+    label: 'Phòng hút thuốc lá',
     x: 1844, y: 646,
     floor: 1,
     links: [
@@ -118,7 +118,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-11',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1863, y: 688,
     floor: 1,
     links: [
@@ -128,7 +128,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-12',
-    label: '☕ Cà phê, ăn nhanh giải khát',
+    label: 'Cà phê, ăn nhanh giải khát',
     x: 1444, y: 441,
     floor: 1,
     links: [
@@ -137,7 +137,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-13',
-    label: '🚪 A1',
+    label: 'A1',
     x: 660, y: 439,
     floor: 1,
     links: [
@@ -148,7 +148,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-14',
-    label: '🚪 A2',
+    label: 'A2',
     x: 743, y: 439,
     floor: 1,
     links: [
@@ -158,7 +158,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-15',
-    label: '🚪 A3',
+    label: 'A3',
     x: 1070, y: 438,
     floor: 1,
     links: [
@@ -169,7 +169,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-16',
-    label: '🚪 A4',
+    label: 'A4',
     x: 1154, y: 433,
     floor: 1,
     links: [
@@ -180,7 +180,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-31',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 672, y: 528,
     floor: 1,
     links: [
@@ -190,7 +190,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-32',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 750, y: 532,
     floor: 1,
     links: [
@@ -200,7 +200,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-33',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 828, y: 529,
     floor: 1,
     links: [
@@ -210,7 +210,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-34',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 908, y: 530,
     floor: 1,
     links: [
@@ -220,7 +220,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-35',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 990, y: 531,
     floor: 1,
     links: [
@@ -230,7 +230,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-36',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 1068, y: 529,
     floor: 1,
     links: [
@@ -241,7 +241,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-37',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 1151, y: 531,
     floor: 1,
     links: [
@@ -252,7 +252,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-38',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 1225, y: 529,
     floor: 1,
     links: [
@@ -262,7 +262,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-39',
-    label: '🛄 Băng chuyền trả hành lý',
+    label: 'Băng chuyền trả hành lý',
     x: 1306, y: 523,
     floor: 1,
     links: [
@@ -271,7 +271,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-41',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 758, y: 644,
     floor: 1,
     links: [
@@ -281,7 +281,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-42',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1277, y: 644,
     floor: 1,
     links: [
@@ -291,7 +291,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-43',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1503, y: 643,
     floor: 1,
     links: [
@@ -301,7 +301,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-44',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 785, y: 640,
     floor: 1,
     links: [
@@ -312,7 +312,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-45',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1456, y: 646,
     floor: 1,
     links: [
@@ -323,7 +323,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-46',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1572, y: 728,
     floor: 1,
     links: [
@@ -334,7 +334,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-47',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1311, y: 685,
     floor: 1,
     links: [
@@ -344,7 +344,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-48',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 766, y: 706,
     floor: 1,
     links: [
@@ -354,7 +354,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-49',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 1503, y: 706,
     floor: 1,
     links: [
@@ -364,7 +364,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-50',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 1602, y: 676,
     floor: 1,
     links: [
@@ -374,7 +374,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-51',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 1351, y: 450,
     floor: 1,
     links: [
@@ -384,7 +384,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-52',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1237, y: 432,
     floor: 1,
     links: [
@@ -395,7 +395,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-53',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 541, y: 613,
     floor: 1,
     links: [
@@ -408,7 +408,7 @@ export const SAMPLE_POIS = [
   // --- Gate (cửa khởi hành) ---
   {
     id: 'poi-101',
-    label: '🚪 Gate 10',
+    label: 'Gate 10',
     x: 594, y: 846,
     floor: 2,
     links: [
@@ -418,7 +418,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-102',
-    label: '🚪 Gate 11',
+    label: 'Gate 11',
     x: 760, y: 837,
     floor: 2,
     links: [
@@ -429,7 +429,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-103',
-    label: '🚪 Gate 13',
+    label: 'Gate 13',
     x: 1076, y: 855,
     floor: 2,
     links: [
@@ -440,7 +440,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-104',
-    label: '🚪 Gate 12',
+    label: 'Gate 12',
     x: 918, y: 841,
     floor: 2,
     links: [
@@ -450,7 +450,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-105',
-    label: '🚪 Gate 14',
+    label: 'Gate 14',
     x: 1280, y: 847,
     floor: 2,
     links: [
@@ -460,7 +460,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-106',
-    label: '🚪 Gate 15',
+    label: 'Gate 15',
     x: 1441, y: 841,
     floor: 2,
     links: [
@@ -471,7 +471,7 @@ export const SAMPLE_POIS = [
   // --- Cổng D ---
   {
     id: 'poi-107',
-    label: '🚪 D1',
+    label: 'D1',
     x: 493, y: 525,
     floor: 2,
     links: [
@@ -481,7 +481,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-108',
-    label: '🚪 D2',
+    label: 'D2',
     x: 641, y: 520,
     floor: 2,
     links: [
@@ -493,7 +493,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-109',
-    label: '🚪 D3',
+    label: 'D3',
     x: 697, y: 515,
     floor: 2,
     links: [
@@ -502,7 +502,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-110',
-    label: '🚪 D4',
+    label: 'D4',
     x: 1056, y: 520,
     floor: 2,
     links: [
@@ -512,7 +512,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-111',
-    label: '🚪 D5',
+    label: 'D5',
     x: 1105, y: 520,
     floor: 2,
     links: [
@@ -522,7 +522,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-112',
-    label: '🚪 D6',
+    label: 'D6',
     x: 1288, y: 519,
     floor: 2,
     links: [
@@ -532,7 +532,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-113',
-    label: '🚪 D7',
+    label: 'D7',
     x: 1340, y: 520,
     floor: 2,
     links: [
@@ -542,7 +542,7 @@ export const SAMPLE_POIS = [
   // --- Thang cuốn ---
   {
     id: 'poi-114',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 406, y: 521,
     floor: 2,
     links: [
@@ -553,7 +553,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-115',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 540, y: 517,
     floor: 2,
     links: [
@@ -565,7 +565,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-116',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 795, y: 518,
     floor: 2,
     links: [
@@ -577,7 +577,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-117',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 946, y: 518,
     floor: 2,
     links: [
@@ -588,7 +588,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-118',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1134, y: 824,
     floor: 2,
     links: [
@@ -599,7 +599,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-119',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 354, y: 849,
     floor: 2,
     links: [
@@ -609,7 +609,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-120',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 494, y: 778,
     floor: 2,
     links: [
@@ -619,7 +619,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-121',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 326, y: 752,
     floor: 2,
     links: [
@@ -632,7 +632,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-122',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 727, y: 742,
     floor: 2,
     links: [
@@ -644,7 +644,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-123',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1124, y: 870,
     floor: 2,
     links: [
@@ -655,7 +655,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-124',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1491, y: 851,
     floor: 2,
     links: [
@@ -665,7 +665,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-125',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1500, y: 774,
     floor: 2,
     links: [
@@ -676,7 +676,7 @@ export const SAMPLE_POIS = [
   // --- Thủ tục hàng không ---
   {
     id: 'poi-126',
-    label: '📋 Thủ tục hàng không',
+    label: 'Thủ tục hàng không',
     x: 429, y: 694,
     floor: 2,
     links: [
@@ -686,7 +686,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-127',
-    label: '📋 Thủ tục hàng không',
+    label: 'Thủ tục hàng không',
     x: 1077, y: 701,
     floor: 2,
     links: [
@@ -696,7 +696,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-128',
-    label: '📋 Thủ tục hàng không',
+    label: 'Thủ tục hàng không',
     x: 1298, y: 702,
     floor: 2,
     links: [
@@ -707,7 +707,7 @@ export const SAMPLE_POIS = [
   // --- Thang máy & WC ---
   {
     id: 'poi-129',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 56, y: 824,
     floor: 2,
     links: [
@@ -717,7 +717,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-130',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 349, y: 777,
     floor: 2,
     links: [
@@ -729,7 +729,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-131',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 79, y: 770,
     floor: 2,
     links: [
@@ -739,7 +739,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-132',
-    label: '🚻 Nhà vệ sinh',
+    label: 'Nhà vệ sinh',
     x: 1517, y: 738,
     floor: 2,
     links: [
@@ -748,7 +748,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-133',
-    label: '🔼 Thang cuốn',
+    label: 'Thang cuốn',
     x: 1843, y: 771,
     floor: 2,
     links: [
@@ -760,7 +760,7 @@ export const SAMPLE_POIS = [
   // ===== TẦNG 4 (internal floor 3) — Dữ liệu thật từ sơ đồ ga T3 =====
   {
     id: 'poi-201',
-    label: '💺 Phòng khách The Sens',
+    label: 'Phòng khách The Sens',
     x: 178, y: 658,
     floor: 3,
     links: [
@@ -770,7 +770,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-202',
-    label: '💺 Phòng khách Bông Sen',
+    label: 'Phòng khách Bông Sen',
     x: 479, y: 654,
     floor: 3,
     links: [
@@ -781,7 +781,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-203',
-    label: '💺 Phòng khách SH Airport Lounge',
+    label: 'Phòng khách SH Airport Lounge',
     x: 859, y: 653,
     floor: 3,
     links: [
@@ -792,7 +792,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-204',
-    label: '💺 Phòng khách Bông Sen',
+    label: 'Phòng khách Bông Sen',
     x: 1091, y: 658,
     floor: 3,
     links: [
@@ -803,7 +803,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-205',
-    label: '💺 Phòng khách thương gia Nam A Bank',
+    label: 'Phòng khách thương gia Nam A Bank',
     x: 1228, y: 655,
     floor: 3,
     links: [
@@ -815,7 +815,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-206',
-    label: '💺 VIP A - ACV Cảng HKQT Tân Sơn Nhất',
+    label: 'VIP A - ACV Cảng HKQT Tân Sơn Nhất',
     x: 1401, y: 655,
     floor: 3,
     links: [
@@ -827,7 +827,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-207',
-    label: '💺 Phòng khách Vietcombank',
+    label: 'Phòng khách Vietcombank',
     x: 1699, y: 649,
     floor: 3,
     links: [
@@ -838,7 +838,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-208',
-    label: '💺 Phòng khách Techcombank',
+    label: 'Phòng khách Techcombank',
     x: 1844, y: 653,
     floor: 3,
     links: [
@@ -847,7 +847,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-209',
-    label: '🚪 Thang bộ',
+    label: 'Thang bộ',
     x: 326, y: 705,
     floor: 3,
     links: [
@@ -857,7 +857,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-210',
-    label: '🚪 Thang bộ',
+    label: 'Thang bộ',
     x: 708, y: 725,
     floor: 3,
     links: [
@@ -867,7 +867,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-211',
-    label: '🚪 Thang bộ',
+    label: 'Thang bộ',
     x: 1133, y: 800,
     floor: 3,
     links: [
@@ -877,7 +877,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-212',
-    label: '🚪 Thang bộ',
+    label: 'Thang bộ',
     x: 1276, y: 715,
     floor: 3,
     links: [
@@ -887,7 +887,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-213',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 381, y: 713,
     floor: 3,
     links: [
@@ -897,7 +897,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-214',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 666, y: 714,
     floor: 3,
     links: [
@@ -907,7 +907,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-215',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1197, y: 807,
     floor: 3,
     links: [
@@ -917,7 +917,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-216',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1369, y: 704,
     floor: 3,
     links: [
@@ -928,7 +928,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-217',
-    label: '🛗 Thang máy',
+    label: 'Thang máy',
     x: 1587, y: 704,
     floor: 3,
     links: [
@@ -938,7 +938,7 @@ export const SAMPLE_POIS = [
   },
   {
     id: 'poi-218',
-    label: '🚪 Thang bộ',
+    label: 'Thang bộ',
     x: 1501, y: 661,
     floor: 3,
     links: [

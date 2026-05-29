@@ -5,6 +5,7 @@
 import { CONFIG } from './config.js';
 import { state } from './state.js';
 import { drawPath } from './route.js';
+import { renderIcons } from './icons.js';
 
 // --- Map init ---
 export function initMap() {
@@ -44,9 +45,9 @@ export function createFloorLayers(map) {
 export function createPlaceholderLayers(map) {
   const bounds = [[0, 0], [CONFIG.imageHeight, CONFIG.imageWidth]];
   const colors = {
-    1: { bg: '#ffe0cc', border: '#ff6b35', label: 'Tầng 2' },
-    2: { bg: '#cce5ff', border: '#0066cc', label: 'Tầng 3' },
-    3: { bg: '#d4edda', border: '#28a745', label: 'Tầng 4' },
+    1: { bg: '#fff0f3', border: '#ff385c', label: 'Tầng 2' },
+    2: { bg: '#f0f0f0', border: '#222222', label: 'Tầng 3' },
+    3: { bg: '#f5f5f5', border: '#6a6a6a', label: 'Tầng 4' },
   };
 
   for (let f = 1; f <= 3; f++) {
@@ -153,6 +154,9 @@ export function switchFloor(floorNum) {
   document.querySelectorAll('.floor-btn').forEach(btn => {
     btn.classList.toggle('active', parseInt(btn.dataset.floor) === floorNum);
   });
+
+  // Render Lucide icons cho markers mới hiện
+  renderIcons();
 }
 
 // --- Check if image files exist ---

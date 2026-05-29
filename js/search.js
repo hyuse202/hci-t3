@@ -8,6 +8,7 @@ import { getAllNodes } from './markers.js';
 import { CATEGORY_KEYWORDS } from './data.js';
 import { switchFloor } from './map.js';
 import { handleMobileTap } from './selection.js';
+import { FLOOR_ICONS, renderIcons } from './icons.js';
 
 // --- Search POIs ---
 export function searchPOIs(query, category) {
@@ -35,17 +36,21 @@ export function showSearchResults(results) {
     return;
   }
 
-  const floorIcons = { 1: '🛂', 2: '🛍️', 3: '🛫' };
+  const floorIcons = FLOOR_ICONS;
 
-  container.innerHTML = results.map(poi => `
-    <div class="search-result-item" data-node-id="${poi.id}">
-      <div class="result-icon">${floorIcons[poi.floor] || '📍'}</div>
-      <div class="result-info">
-        <div class="result-label">${poi.label}</div>
-        <div class="result-floor">Tầng ${displayFloor(poi.floor)}</div>
+  container.innerHTML = results.map(poi => {
+    const cleanLabel = poi.label.replace(/^[\p{Emoji}\p{Emoji_Component}]+\s*/u, '') || poi.label;
+    return `
+      <div class="search-result-item" data-node-id="${poi.id}">
+        <div class="result-icon"><i data-lucide="${floorIcons[poi.floor] || 'map-pin'}"></i></div>
+        <div class="result-info">
+          <div class="result-label">${cleanLabel}</div>
+          <div class="result-floor">Tầng ${displayFloor(poi.floor)}</div>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+  renderIcons();
 }
 
 // --- Handle search result tap ---

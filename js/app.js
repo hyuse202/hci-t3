@@ -8,13 +8,14 @@ import { CONFIG } from './config.js';
 import { state } from './state.js';
 import { initMap, createFloorLayers, createPlaceholderLayers, switchFloor, checkImagesExist } from './map.js';
 import { placeMarkers, populateDropdowns, refreshMarkers, getAllNodes } from './markers.js';
-import { findRoute } from './route.js';
+import { findRoute, syncRouteCardToggle } from './route.js';
 import { clearRoute, clearSelection } from './selection.js';
 import { addCustomNode, deleteCustomNode, exportCoords, loadCustomNodes, loadPoiPositions, saveCustomNodes, renderCustomPointsList } from './custom-nodes.js';
-import { setGpsMode } from './gps.js';
+import { setGpsMode, requestGpsPermission } from './gps.js';
 import { setupPanelToggle, autoOpenPanel } from './ui.js';
 import { registerServiceWorker } from './sw-register.js';
 import { setupSearchEvents } from './search.js';
+import { renderIcons } from './icons.js';
 
 function init() {
   state.map = initMap();
@@ -29,6 +30,19 @@ function init() {
   populateDropdowns();
   renderCustomPointsList();
   setupPanelToggle();
+
+  // Route info collapse toggle (desktop panel)
+  const routeInfo = document.getElementById('route-info');
+  const routeInfoToggle = document.getElementById('route-info-toggle');
+  if (routeInfo && routeInfoToggle) {
+    routeInfoToggle.addEventListener('click', () => {
+      const collapsed = routeInfo.classList.toggle('collapsed');
+      routeInfoToggle.setAttribute('aria-expanded', String(!collapsed));
+    });
+  }
+
+  // Render Lucide icons (static HTML + markers)
+  renderIcons();
   registerServiceWorker();
 
   // Floor switch events
@@ -111,14 +125,14 @@ function init() {
   // Search events
   setupSearchEvents();
 
-  // Route card drag-to-dismiss
+  // Route card drag: swipe down → collapse to peek, swipe up → expand
   const routeCard = document.getElementById('route-card');
   if (routeCard) {
     let touchStartY = 0;
     let cardTranslateY = 0;
 
     routeCard.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.drag-handle')) {
+      if (e.target.closest('.drag-handle') || routeCard.classList.contains('collapsed')) {
         touchStartY = e.touches[0].clientY;
       }
     }, { passive: true });
@@ -126,15 +140,30 @@ function init() {
     routeCard.addEventListener('touchmove', (e) => {
       if (touchStartY === 0) return;
       const dy = e.touches[0].clientY - touchStartY;
-      if (dy > 0) {
-        cardTranslateY = dy;
-        routeCard.style.transform = `translateY(${dy}px)`;
+
+      if (routeCard.classList.contains('collapsed')) {
+        // Swiping up from collapsed → expand
+        if (dy < -30) {
+          routeCard.classList.remove('collapsed');
+          routeCard.dataset.userCollapse = 'expanded';
+          syncRouteCardToggle(routeCard);
+          touchStartY = 0;
+        }
+      } else {
+        // Swiping down → follow finger
+        if (dy > 0) {
+          cardTranslateY = dy;
+          routeCard.style.transform = `translateY(${dy}px)`;
+        }
       }
     }, { passive: true });
 
     routeCard.addEventListener('touchend', () => {
       if (cardTranslateY > 80) {
-        clearSelection();
+        // Collapse to peek state instead of dismissing
+        routeCard.classList.add('collapsed');
+        routeCard.dataset.userCollapse = 'collapsed';
+        syncRouteCardToggle(routeCard);
       }
       routeCard.style.transform = '';
       touchStartY = 0;
@@ -164,10 +193,9 @@ function init() {
   });
 
   console.log('✅ App ready! Current floor:', state.currentFloor);
-  console.log('📌 Cách đánh tọa độ:');
-  console.log('   1. Bật "Chế độ đánh dấu"');
-  console.log('   2. Click vào bản đồ để thêm điểm');
-  console.log('   3. Xem tọa độ trong console (F12)');
+
+  // First-visit GPS onboarding
+  requestGpsPermission();
 }
 
 // --- Public API cho console ---

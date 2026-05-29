@@ -1,27 +1,55 @@
 /* ==========================================
    tokens.css — Design tokens, reset, utilities
+   Airbnb-inspired visual language
    ========================================== */
 
 :root {
-  --font-display: "Instrument Serif", serif;
-  --font-body: "Hanken Grotesk", sans-serif;
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
 
-  --paper: #ffffff;
-  --panel: #ffffff;
-  --ink: #1f1a16;
-  --muted: #6f675f;
-  --line: rgba(31, 26, 22, 0.12);
-  --accent: #ff6b35;
-  --accent-strong: #e15423;
-  --accent-soft: rgba(255, 107, 53, 0.18);
+  /* --- Airbnb Color System --- */
+  --rausch: #ff385c;
+  --rausch-active: #e00b41;
+  --rausch-disabled: #ffd1da;
+  --rausch-soft: rgba(255, 56, 92, 0.10);
 
-  --shadow-1: 0 18px 40px rgba(16, 13, 10, 0.12);
-  --shadow-2: 0 10px 26px rgba(16, 13, 10, 0.1);
+  --canvas: #ffffff;
+  --surface-soft: #f7f7f7;
+  --surface-strong: #f2f2f2;
 
-  --radius-lg: 18px;
-  --radius-md: 12px;
+  --hairline: #dddddd;
+  --hairline-soft: #ebebeb;
+
+  --ink: #222222;
+  --body: #3f3f3f;
+  --muted: #6a6a6a;
+  --muted-soft: #929292;
+
+  --on-primary: #ffffff;
+  --error: #c13515;
+  --scrim: rgba(0, 0, 0, 0.50);
+
+  /* Legacy aliases (for gradual migration) */
+  --paper: var(--canvas);
+  --panel: var(--canvas);
+  --accent: var(--rausch);
+  --accent-strong: var(--rausch-active);
+  --accent-soft: var(--rausch-soft);
+  --line: var(--hairline);
+
+  /* --- Shadows (single Airbnb tier) --- */
+  --shadow-card: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px, rgba(0,0,0,0.1) 0 4px 8px;
+  --shadow-float: 0 6px 20px rgba(0,0,0,0.12);
+  --shadow-1: var(--shadow-card);
+  --shadow-2: var(--shadow-card);
+
+  /* --- Radius --- */
+  --radius-full: 9999px;
+  --radius-lg: 14px;
+  --radius-md: 8px;
   --radius-sm: 8px;
 
+  /* --- Spacing (4px base) --- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -29,8 +57,11 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
 
-  --topbar-h: 66px;
+  /* --- Layout --- */
+  --topbar-h: 80px;
   --panel-w: 360px;
   --sheet-peek: 74px;
 }
@@ -48,9 +79,11 @@ body {
 
 body {
   font-family: var(--font-body);
-  background: var(--paper);
+  background: var(--canvas);
   color: var(--ink);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app {
@@ -63,4 +96,27 @@ body {
 
 .hidden {
   display: none;
+}
+
+/* --- Lucide SVG icons global sizing --- */
+[data-lucide],
+.category-chip svg,
+.floor-btn svg,
+.btn svg,
+.search-icon svg,
+.gps-icon svg,
+.search-close svg,
+.panel-section h3 svg,
+.toggle-text svg,
+.voucher-icon svg,
+.result-icon svg,
+.step-marker svg,
+.route-card-stats svg,
+.steps-title svg,
+.btn-card svg,
+.icon-button svg,
+.custom-point-index + .icon-button svg {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
 }

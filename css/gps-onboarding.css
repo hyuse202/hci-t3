@@ -1,0 +1,81 @@
+/* ==========================================
+   gps-onboarding.css — First-visit GPS permission modal
+   Airbnb-inspired: clean card, Rausch accent, generous white space
+   ========================================== */
+
+.gps-onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.gps-onboarding.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gps-onboarding-card {
+  background: var(--canvas);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-8) var(--space-7);
+  max-width: 360px;
+  width: calc(100% - 48px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.gps-onboarding.visible .gps-onboarding-card {
+  transform: translateY(0);
+}
+
+.gps-onboarding-card .onboarding-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--rausch-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-2);
+}
+
+.gps-onboarding-card .onboarding-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--rausch);
+}
+
+.gps-onboarding-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.gps-onboarding-card p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.gps-onboarding-card .btn {
+  width: 100%;
+}
+
+.gps-onboarding-card .btn-ghost {
+  margin-top: -4px;
+}

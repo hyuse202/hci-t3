@@ -1,0 +1,164 @@
+/* ==========================================
+   markers.css — POI markers, selection states, GPS dot, animations
+   ========================================== */
+
+.poi-marker {
+  opacity: 1;
+}
+
+.poi-marker .poi-pill {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--poi-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.poi-marker .poi-pill:active {
+  transform: scale(0.9);
+}
+
+.poi-marker .poi-pill .pill-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.poi-marker .poi-pill .pill-label {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width 0.3s ease, opacity 0.2s ease;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.poi-pill.expanded {
+  width: auto;
+  padding: 6px 12px 6px 8px;
+  border-radius: 20px;
+  gap: 4px;
+}
+
+.poi-pill.expanded .pill-label {
+  max-width: 200px;
+  opacity: 1;
+}
+
+/* --- Re-declared pill (expanded label variant) --- */
+.poi-pill {
+  background: var(--poi-color);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.poi-pill.is-custom {
+  border-style: dashed;
+}
+
+/* --- Selection states --- */
+.poi-pill.selected-from .pill-label,
+.poi-pill.selected-to .pill-label {
+  max-width: 200px;
+  opacity: 1;
+}
+
+.poi-pill.selected-from {
+  background: #28a745 !important;
+}
+
+.poi-pill.selected-to {
+  background: #dc3545 !important;
+}
+
+/* --- GPS marker --- */
+.gps-marker {
+  background: transparent;
+}
+
+.gps-dot {
+  width: 14px;
+  height: 14px;
+  background: #1e88e5;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(30, 136, 229, 0.2), 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Animations --- */
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+  50% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.24); }
+}
+
+@keyframes tapBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1.08); }
+}
+
+/* --- Responsive: ≤900px --- */
+@media (max-width: 900px) {
+  .poi-pill {
+    padding: 7px 12px;
+    font-size: 11px;
+    min-width: 40px;
+    min-height: 32px;
+    animation: breathe 2.5s ease-in-out infinite;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .poi-pill:active {
+    transform: scale(1.15);
+  }
+
+  .poi-pill.selected-from {
+    background: #28a745 !important;
+  }
+
+  .poi-pill.selected-to {
+    background: #dc3545 !important;
+  }
+
+  .poi-pill.tapped {
+    animation: tapBounce 0.3s ease-out;
+  }
+}
+
+/* --- Responsive: ≥901px --- */
+@media (min-width: 901px) {
+  .poi-pill {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .poi-pill:hover {
+    transform: scale(1.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  }
+
+  .poi-pill.selected-from {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .poi-pill.selected-to {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+}

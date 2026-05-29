@@ -1,0 +1,9 @@
+/* ==========================================
+   layout.css — Main layout container
+   ========================================== */
+
+.layout {
+  position: relative;
+  display: block;
+  height: calc(100vh - var(--topbar-h));
+}

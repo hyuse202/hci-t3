@@ -1,0 +1,47 @@
+/* ==========================================
+   floor-tabs.css — Floating floor switcher at bottom
+   ========================================== */
+
+.floor-tabs-bottom {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 56;
+}
+
+/* --- Responsive: ≤900px --- */
+@media (max-width: 900px) {
+  .floor-tabs-bottom {
+    bottom: 16px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .floor-tabs-bottom .floor-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}
+
+/* --- Responsive: ≥901px --- */
+@media (min-width: 901px) {
+  .floor-tabs-bottom {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .floor-tabs-bottom .floor-btn {
+    padding: 7px 18px;
+    font-size: 13px;
+  }
+}

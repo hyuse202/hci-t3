@@ -1,0 +1,30 @@
+/* ==========================================
+   route-info.css — Route details in panel
+   ========================================== */
+
+.route-info {
+  border-left: 3px solid var(--accent);
+  background: #fff7f2;
+}
+
+#route-details {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #2c2621;
+}
+
+#route-details .step {
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(31, 26, 22, 0.16);
+}
+
+#route-details .step:last-child {
+  border-bottom: none;
+}
+
+#route-details .stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-weight: 600;
+}

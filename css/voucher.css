@@ -1,0 +1,51 @@
+/* ==========================================
+   voucher.css — Voucher banner (gamification)
+   ========================================== */
+
+.voucher-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 6px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  border: 1px solid #ffcc80;
+  border-radius: 12px;
+}
+
+.voucher-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.voucher-body {
+  flex: 1;
+}
+
+.voucher-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #e65100;
+  margin-bottom: 2px;
+}
+
+.voucher-desc {
+  font-size: 11px;
+  color: #bf360c;
+  line-height: 1.4;
+}
+
+.voucher-code {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #e65100;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.5px;
+}
+
+.voucher-footnote {
+  margin-top: 2px;
+  font-size: 9px;
+  color: #a1887f;
+  font-style: italic;
+}

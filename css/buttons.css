@@ -1,0 +1,65 @@
+/* ==========================================
+   buttons.css — Button styles, icon buttons, toggles
+   ========================================== */
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  width: 100%;
+  margin-top: var(--space-4);
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
+}
+
+.btn-secondary {
+  width: 100%;
+  margin-top: var(--space-3);
+  background: #ede7df;
+  color: #3f362f;
+  border-color: rgba(63, 54, 47, 0.12);
+}
+
+.btn-secondary:hover {
+  background: #e2dbd2;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink);
+}
+
+.btn-small {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+.btn-ghost.btn-small {
+  width: 100%;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c2410c;
+  font-size: 16px;
+  padding: 0 4px;
+}

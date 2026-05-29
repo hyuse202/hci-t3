@@ -1,0 +1,81 @@
+/* ==========================================
+   map.css — Map area, floor buttons, Leaflet overrides
+   ========================================== */
+
+.map-area {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  z-index: 1;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.floor-btn {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+
+.floor-btn:hover {
+  color: var(--ink);
+  background: rgba(31, 26, 22, 0.06);
+}
+
+.floor-btn.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* --- Leaflet overrides --- */
+.leaflet-container {
+  background: #ffffff;
+  font-family: var(--font-body);
+}
+
+.leaflet-control-zoom a {
+  border-radius: 10px;
+  box-shadow: var(--shadow-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.route-path {
+  stroke-dasharray: 8, 4;
+}
+
+/* --- Responsive: ≤900px --- */
+@media (max-width: 900px) {
+  .map-area {
+    inset: 0;
+  }
+
+  .leaflet-control-zoom {
+    margin-top: 60px;
+  }
+}
+
+/* --- Responsive: ≥901px --- */
+@media (min-width: 901px) {
+  .map-area {
+    inset: 0;
+  }
+
+  .leaflet-control-zoom {
+    margin-top: 60px;
+  }
+}

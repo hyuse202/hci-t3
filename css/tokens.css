@@ -1,0 +1,66 @@
+/* ==========================================
+   tokens.css — Design tokens, reset, utilities
+   ========================================== */
+
+:root {
+  --font-display: "Instrument Serif", serif;
+  --font-body: "Hanken Grotesk", sans-serif;
+
+  --paper: #ffffff;
+  --panel: #ffffff;
+  --ink: #1f1a16;
+  --muted: #6f675f;
+  --line: rgba(31, 26, 22, 0.12);
+  --accent: #ff6b35;
+  --accent-strong: #e15423;
+  --accent-soft: rgba(255, 107, 53, 0.18);
+
+  --shadow-1: 0 18px 40px rgba(16, 13, 10, 0.12);
+  --shadow-2: 0 10px 26px rgba(16, 13, 10, 0.1);
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+
+  --topbar-h: 66px;
+  --panel-w: 360px;
+  --sheet-peek: 74px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hidden {
+  display: none;
+}

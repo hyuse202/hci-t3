@@ -1,0 +1,250 @@
+/* ==========================================
+   route-card.css — Mobile route card (bottom sheet)
+   ========================================== */
+
+.route-card {
+  position: fixed;
+  bottom: 68px;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 10px 16px 16px;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  transform: translateY(calc(100% + 80px));
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 50;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.route-card.visible {
+  transform: translateY(0);
+}
+
+.route-card .drag-handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.12);
+  margin: 0 auto 14px;
+  cursor: grab;
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.route-card-stats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.route-card-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.route-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.route-card-actions .btn-card {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 0.15s;
+}
+
+.route-card-actions .btn-card:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.route-card-actions .btn-card.danger {
+  color: #d32f2f;
+  border-color: rgba(211, 47, 47, 0.2);
+}
+
+.route-card-steps {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.route-card-steps .steps-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.route-step {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+.route-step:last-child {
+  border-bottom: none;
+}
+
+.route-step .step-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.route-step .step-marker.start {
+  background: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.route-step .step-marker.end {
+  background: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.route-step .step-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-step .step-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.route-step .step-floor {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* --- Voucher in Route Card --- */
+.route-card .voucher-banner {
+  margin: 0 0 14px;
+}
+
+/* --- Responsive: ≤900px --- */
+@media (max-width: 900px) {
+  .route-card {
+    max-height: 50vh;
+  }
+
+  .route-card-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .route-card-stats .stat {
+    font-size: 14px;
+  }
+
+  .route-card-actions {
+    width: 100%;
+  }
+
+  .route-card-actions .btn-card {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* --- Responsive: ≤600px --- */
+@media (max-width: 600px) {
+  .route-card {
+    max-height: 55vh;
+    padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .route-card .drag-handle {
+    width: 32px;
+    height: 4px;
+    margin-bottom: 10px;
+  }
+
+  .route-step .step-marker {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .route-step .step-label {
+    font-size: 13px;
+  }
+}
+
+/* --- Responsive: ≥901px --- */
+@media (min-width: 901px) {
+  .route-card {
+    max-width: 520px;
+    width: calc(100% - 40px);
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    max-height: 48vh;
+    border-radius: 22px;
+    box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+
+  .route-card .drag-handle:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .route-card-header {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .route-card-stats .stat {
+    font-size: 16px;
+  }
+
+  .route-card-actions .btn-card {
+    padding: 10px 18px;
+    font-size: 13px;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .route-card-actions .btn-card:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .route-card-actions .btn-card.danger:hover {
+    background: rgba(211, 47, 47, 0.08);
+  }
+
+  .route-step:hover {
+    background: rgba(255, 107, 53, 0.03);
+    border-radius: 8px;
+  }
+}

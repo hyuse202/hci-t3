@@ -8,16 +8,16 @@
 
 // Category → Lucide icon name (used by markers.js to pick icon from POI label)
 export const CATEGORY_ICONS = {
-  gate: 'door-open',
+  gate: 'plane',
   lounge: 'armchair',
-  wc: 'droplets',
+  wc: 'toilet',
   elevator: 'arrow-up-down',
   escalator: 'chevrons-up',
   food: 'coffee',
   baggage: 'luggage',
   smoke: 'cigarette-off',
   checkin: 'clipboard-check',
-  stairs: 'door-open',
+  stairs: 'stairs',
   custom: 'map-pin',
   other: 'map-pin',
 };

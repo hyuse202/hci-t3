@@ -5,9 +5,19 @@
 
 .poi-marker {
   opacity: 1;
+  overflow: visible !important;
 }
 
-.poi-marker .poi-pill {
+.poi-marker-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.poi-marker-wrapper .poi-pill {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -24,74 +34,70 @@
   white-space: nowrap;
 }
 
-.poi-marker .poi-pill:active {
+.poi-marker-wrapper .poi-pill:active {
   transform: scale(0.9);
 }
 
-.poi-marker .poi-pill .pill-icon {
+.poi-marker-wrapper .poi-pill .pill-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
 }
 
-.poi-marker .poi-pill .pill-icon svg {
+.poi-marker-wrapper .poi-pill .pill-icon svg {
   width: 18px;
   height: 18px;
 }
 
-.poi-marker .poi-pill .pill-label {
-  max-width: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-width 0.3s ease, opacity 0.2s ease;
-  font-size: 11px;
+/* Label tag below the icon, Google Maps style */
+.poi-marker-wrapper .poi-label-tag {
+  position: absolute;
+  top: 40px; /* immediately below the circle */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  font-size: 10px;
   font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--hairline-soft);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s, color 0.2s;
+  z-index: 5;
 }
 
-.poi-pill.expanded {
-  width: auto;
-  padding: 6px 12px 6px 8px;
-  border-radius: 20px;
-  gap: 4px;
-}
-
-.poi-pill.expanded .pill-label {
-  max-width: 200px;
-  opacity: 1;
-}
-
-/* --- Re-declared pill (expanded label variant) --- */
-.poi-pill {
-  background: var(--poi-color);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  border: 2px solid var(--canvas);
-  box-shadow: var(--shadow-card);
-}
-
+/* Custom markers have dashed border */
 .poi-pill.is-custom {
   border-style: dashed;
 }
 
 /* --- Selection states --- */
-.poi-pill.selected-from .pill-label,
-.poi-pill.selected-to .pill-label {
-  max-width: 200px;
-  opacity: 1;
-}
-
 .poi-pill.selected-from {
   background: var(--ink) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 0 4px rgba(34, 34, 34, 0.15), var(--shadow-card);
 }
 
 .poi-pill.selected-to {
   background: var(--rausch) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 0 4px var(--rausch-soft), var(--shadow-card);
+}
+
+.poi-pill.selected-from + .poi-label-tag {
+  background: var(--ink) !important;
+  color: #fff !important;
+  border-color: var(--ink) !important;
+}
+
+.poi-pill.selected-to + .poi-label-tag {
+  background: var(--rausch) !important;
+  color: #fff !important;
+  border-color: var(--rausch) !important;
 }
 
 /* --- GPS marker --- */
@@ -122,25 +128,22 @@
 
 /* --- Responsive: ≤900px --- */
 @media (max-width: 900px) {
-  .poi-pill {
-    padding: 7px 12px;
-    font-size: 11px;
-    min-width: 40px;
-    min-height: 32px;
+  .poi-marker-wrapper .poi-pill {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
     animation: breathe 2.5s ease-in-out infinite;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .poi-pill:active {
+  .poi-marker-wrapper .poi-pill:active {
     transform: scale(1.15);
   }
 
-  .poi-pill.selected-from {
-    background: var(--ink) !important;
-  }
-
-  .poi-pill.selected-to {
-    background: var(--rausch) !important;
+  .poi-marker-wrapper .poi-label-tag {
+    font-size: 9px;
+    padding: 1px 4px;
+    top: 42px;
   }
 
   .poi-pill.tapped {
@@ -150,23 +153,13 @@
 
 /* --- Responsive: ≥901px --- */
 @media (min-width: 901px) {
-  .poi-pill {
+  .poi-marker-wrapper .poi-pill {
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .poi-pill:hover {
+  .poi-marker-wrapper .poi-pill:hover {
     transform: scale(1.12);
     box-shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.06) 0 3px 8px, rgba(0,0,0,0.14) 0 6px 14px;
-  }
-
-  .poi-pill.selected-from {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 4px rgba(34, 34, 34, 0.15), var(--shadow-card);
-  }
-
-  .poi-pill.selected-to {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 4px var(--rausch-soft), var(--shadow-card);
   }
 }

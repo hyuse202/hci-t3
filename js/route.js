@@ -4,7 +4,7 @@
 
 import { displayFloor, WALKING_SPEED, VOUCHER_THRESHOLD } from './config.js';
 import { state } from './state.js';
-import { getAllNodes } from './markers.js';
+import { getAllNodes, updateMarkersVisibility } from './markers.js';
 import { buildGraph, aStar } from './pathfinding.js';
 import { autoOpenPanel } from './ui.js';
 import { renderIcons } from './icons.js';
@@ -99,8 +99,19 @@ export function drawPath(path) {
     if (startNode) {
       setTimeout(() => state.map.panTo([startNode.y, startNode.x], { animate: true, duration: 0.5 }), 300);
     }
+
+    const mapArea = document.querySelector('.map-area');
+    if (mapArea) {
+      mapArea.classList.add('route-active');
+    }
+    updateMarkersVisibility();
   } else {
     state.currentPathLayer = null;
+    const mapArea = document.querySelector('.map-area');
+    if (mapArea) {
+      mapArea.classList.remove('route-active');
+    }
+    updateMarkersVisibility();
   }
 }
 
@@ -131,17 +142,9 @@ export function showRouteInfo(path, graph) {
   }
 
   html += '<hr style="border: none; border-top: 1px dashed #dddddd; margin: 8px 0;">';
-  html += '<div class="route-steps-title"><i data-lucide="map-pin" style="width:14px;height:14px;vertical-align:-2px;"></i> Các bước:</div>';
+  html += '<div class="route-steps-title"><i data-lucide="map-pin" style="width:14px;height:14px;vertical-align:-2px;"></i> Lộ trình theo chặng:</div>';
   html += '<div class="route-steps-list">';
-
-  path.forEach((id, idx) => {
-    const node = nodeMap[id];
-    if (!node) return;
-    const prefix = idx === 0 ? '<i data-lucide="play" style="width:12px;height:12px;color:#222;vertical-align:-1px;"></i> Xuất phát'
-                   : idx === path.length - 1 ? '<i data-lucide="flag" style="width:12px;height:12px;color:#ff385c;vertical-align:-1px;"></i> Điểm đến'
-                   : `<i data-lucide="corner-down-right" style="width:12px;height:12px;color:#6a6a6a;vertical-align:-1px;"></i> Bước ${idx}`;
-    html += `<div class="step">${prefix}: <strong>${node.label}</strong> <span style="color:#6a6a6a;font-size:11px;">[T${displayFloor(node.floor)}]</span></div>`;
-  });
+  html += generateRouteStagesHtml(path, nodeMap);
   html += '</div>';
   html += '</div>';
 
@@ -266,35 +269,8 @@ export function showRouteCard(path, graph) {
 
   // Steps
   html += '<div class="route-card-steps">';
-  html += '<div class="steps-title"><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> Hướng dẫn</div>';
-
-  path.forEach((id, idx) => {
-    const node = nodeMap[id];
-    if (!node) return;
-
-    let markerCls = '';
-    let markerContent = '';
-    if (idx === 0) {
-      markerCls = 'start';
-      markerContent = '<i data-lucide="play" style="width:12px;height:12px;"></i>';
-    } else if (idx === path.length - 1) {
-      markerCls = 'end';
-      markerContent = '<i data-lucide="flag" style="width:12px;height:12px;"></i>';
-    } else {
-      markerContent = idx;
-    }
-
-    html += `
-      <div class="route-step">
-        <div class="step-marker ${markerCls}">${markerContent}</div>
-        <div class="step-info">
-          <div class="step-label">${node.label}</div>
-          <div class="step-floor">Tầng ${displayFloor(node.floor)}</div>
-        </div>
-      </div>
-    `;
-  });
-
+  html += '<div class="steps-title"><i data-lucide="map-pin" style="width:12px;height:12px;vertical-align:-1px;"></i> Hướng dẫn theo chặng</div>';
+  html += generateRouteStagesHtml(path, nodeMap);
   html += '</div>';
 
   content.innerHTML = html;
@@ -302,9 +278,19 @@ export function showRouteCard(path, graph) {
   const toggleBtn = card.querySelector('.route-card-toggle');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
-      const collapsed = !card.classList.contains('collapsed');
-      card.classList.toggle('collapsed', collapsed);
-      card.dataset.userCollapse = collapsed ? 'collapsed' : 'expanded';
+      if (card.classList.contains('collapsed')) {
+        card.classList.remove('collapsed');
+        card.classList.remove('maximized');
+        card.dataset.userCollapse = 'expanded';
+      } else if (card.classList.contains('maximized')) {
+        card.classList.remove('collapsed');
+        card.classList.remove('maximized');
+        card.dataset.userCollapse = 'expanded';
+      } else {
+        card.classList.add('collapsed');
+        card.classList.remove('maximized');
+        card.dataset.userCollapse = 'collapsed';
+      }
       syncRouteCardToggle(card);
     });
   }
@@ -323,7 +309,143 @@ export function syncRouteCardToggle(card) {
   const toggleBtn = card.querySelector('.route-card-toggle');
   if (!toggleBtn) return;
   const collapsed = card.classList.contains('collapsed');
+  const maximized = card.classList.contains('maximized');
   toggleBtn.setAttribute('aria-expanded', String(!collapsed));
   const text = toggleBtn.querySelector('.toggle-text');
-  if (text) text.textContent = collapsed ? 'Mở' : 'Thu gọn';
+  if (text) {
+    if (collapsed) {
+      text.textContent = 'Mở';
+    } else if (maximized) {
+      text.textContent = 'Thu nhỏ';
+    } else {
+      text.textContent = 'Thu gọn';
+    }
+  }
+}
+
+// --- Tạo HTML hiển thị chặng đường ---
+export function generateRouteStagesHtml(path, nodeMap) {
+  const nodes = path.map(id => nodeMap[id]).filter(Boolean);
+  if (nodes.length === 0) return '';
+
+  const stages = [];
+  let currentStage = null;
+
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const nextNode = nodes[i + 1];
+
+    if (!currentStage) {
+      currentStage = {
+        type: 'floor_move',
+        floor: node.floor,
+        nodes: [node]
+      };
+    } else {
+      currentStage.nodes.push(node);
+    }
+
+    if (nextNode) {
+      if (nextNode.floor !== node.floor) {
+        stages.push(currentStage);
+
+        let connectorType = 'thang';
+        const labelLower = node.label.toLowerCase();
+        if (labelLower.includes('cuốn')) connectorType = 'thang cuốn';
+        else if (labelLower.includes('máy')) connectorType = 'thang máy';
+        else if (labelLower.includes('bộ')) connectorType = 'thang bộ';
+
+        stages.push({
+          type: 'floor_change',
+          fromFloor: node.floor,
+          toFloor: nextNode.floor,
+          connector: node,
+          connectorType: connectorType
+        });
+
+        currentStage = null;
+      }
+    }
+  }
+  if (currentStage) {
+    stages.push(currentStage);
+  }
+
+  let html = '<div class="route-stages-timeline">';
+  
+  stages.forEach((stage, idx) => {
+    const stageNum = idx + 1;
+    if (stage.type === 'floor_move') {
+      const isStart = idx === 0;
+      const isEnd = idx === stages.length - 1;
+      const first = stage.nodes[0];
+      const last = stage.nodes[stage.nodes.length - 1];
+      
+      let title = `Chặng ${stageNum}: Đi trên Tầng ${displayFloor(stage.floor)}`;
+      if (isStart && isEnd) {
+        title = `Di chuyển tại Tầng ${displayFloor(stage.floor)}`;
+      }
+
+      let desc = '';
+      if (stage.nodes.length === 1) {
+        desc = `Tại <strong>${first.label}</strong>`;
+      } else if (stage.nodes.length === 2) {
+        desc = `Từ <strong>${first.label}</strong> tới <strong>${last.label}</strong>`;
+      } else {
+        // Lọc các địa điểm trung gian:
+        // 1. Bỏ qua các tiện ích đi ngang qua (thang máy, thang cuốn, nhà vệ sinh, wc, vv) do người dùng chỉ đi ngang chứ không sử dụng
+        // 2. Bỏ qua nếu trùng tên với điểm bắt đầu hoặc kết thúc của chặng
+        const filteredMiddle = stage.nodes.slice(1, -1).filter(node => {
+          const lbl = node.label.toLowerCase();
+          const isUtility = lbl.includes('thang') || lbl.includes('vệ sinh') || lbl.includes('wc') || lbl.includes('lối đi') || lbl.includes('hành lang');
+          const isStartOrEndLabel = (node.label === first.label || node.label === last.label);
+          return !isUtility && !isStartOrEndLabel;
+        });
+
+        // 3. Loại bỏ trùng lặp liên tiếp (ví dụ: chuỗi băng chuyền hành lý dài)
+        const uniqueMiddle = [];
+        filteredMiddle.forEach(node => {
+          if (uniqueMiddle.length === 0 || uniqueMiddle[uniqueMiddle.length - 1].label !== node.label) {
+            uniqueMiddle.push(node);
+          }
+        });
+
+        if (uniqueMiddle.length === 0) {
+          desc = `Từ <strong>${first.label}</strong> tới <strong>${last.label}</strong>`;
+        } else {
+          const middleLabels = uniqueMiddle.map(n => n.label).join(' → ');
+          desc = `Từ <strong>${first.label}</strong> qua <em>${middleLabels}</em> tới <strong>${last.label}</strong>`;
+        }
+      }
+
+      html += `
+        <div class="route-stage-item stage-move">
+          <div class="stage-badge"><i data-lucide="map"></i></div>
+          <div class="stage-content">
+            <div class="stage-title">${title}</div>
+            <div class="stage-desc">${desc}</div>
+          </div>
+        </div>
+      `;
+    } else if (stage.type === 'floor_change') {
+      const direction = stage.toFloor > stage.fromFloor ? 'lên' : 'xuống';
+      const iconName = stage.connectorType === 'thang cuốn' ? 'chevrons-up' 
+                       : stage.connectorType === 'thang máy' ? 'arrow-up-down' 
+                       : 'door-open';
+      const desc = `Đi <strong>${stage.connectorType} (${stage.connector.label})</strong> để ${direction} Tầng ${displayFloor(stage.toFloor)}`;
+      
+      html += `
+        <div class="route-stage-item stage-change">
+          <div class="stage-badge"><i data-lucide="${iconName}"></i></div>
+          <div class="stage-content">
+            <div class="stage-title">Đổi tầng (${direction.toUpperCase()})</div>
+            <div class="stage-desc">${desc}</div>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  html += '</div>';
+  return html;
 }

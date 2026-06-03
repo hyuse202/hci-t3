@@ -3,7 +3,7 @@
  */
 
 import { state } from './state.js';
-import { getAllNodes } from './markers.js';
+import { getAllNodes, updateMarkersVisibility } from './markers.js';
 import { buildGraph, aStar } from './pathfinding.js';
 import { clearRouteArrows, drawPath, showRouteCard, hideRouteCard } from './route.js';
 import { switchFloor } from './map.js';
@@ -100,6 +100,13 @@ export function clearSelection() {
   }
   clearRouteArrows();
   state.currentPath = null;
+
+  // Xoá class route-active khỏi map-area và reset markers
+  const mapArea = document.querySelector('.map-area');
+  if (mapArea) {
+    mapArea.classList.remove('route-active');
+  }
+  updateMarkersVisibility();
 
   // Reset dropdowns
   if (state.gpsMode && state.gpsNode) {

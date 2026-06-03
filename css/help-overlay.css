@@ -1,0 +1,245 @@
+/* ==========================================
+   help-overlay.css — User Guide & Onboarding Modal
+   Airbnb-inspired design: soft overlay, rounded corners, rausch accents
+   ========================================== */
+
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110; /* Above GPS onboarding (100) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.help-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.help-card {
+  background: var(--canvas);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px 24px 24px;
+  max-width: 400px;
+  width: calc(100% - 32px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.help-overlay:not(.hidden) .help-card {
+  transform: translateY(0);
+}
+
+/* Close button */
+.help-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.help-close-btn:hover {
+  background-color: var(--surface-soft);
+  color: var(--ink);
+}
+
+.help-close-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Slides container */
+.help-slides {
+  width: 100%;
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  overflow: hidden;
+}
+
+.help-slide {
+  width: 100%;
+  flex-shrink: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: slideFadeIn 0.3s ease-out;
+}
+
+.help-slide.active {
+  display: flex;
+}
+
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.help-slide .slide-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--rausch-soft), rgba(255, 56, 92, 0.22));
+  border: 4px solid var(--rausch-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rausch);
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(255, 56, 92, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.help-slide .slide-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.help-slide h3 {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.help-slide p {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+  padding: 0 8px;
+}
+
+.help-slide p strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Footer layout */
+.help-footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  border-top: 1px solid var(--hairline-soft);
+  padding-top: 16px;
+}
+
+/* Dots indicator */
+.help-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.help-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hairline);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.help-dots .dot.active {
+  background: var(--rausch);
+  transform: scale(1.25);
+}
+
+.help-nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.help-nav-buttons .btn {
+  min-width: 90px;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  line-height: 1;
+}
+
+.help-nav-buttons .btn-ghost {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+}
+
+.help-nav-buttons .btn-ghost:hover {
+  background: var(--surface-soft);
+}
+
+/* Help button in topbar */
+.topbar-actions .help-toggle-btn {
+  border: 1px solid var(--hairline);
+  background: var(--canvas);
+  color: var(--ink);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.topbar-actions .help-toggle-btn:hover {
+  background: var(--surface-soft);
+  border-color: var(--muted);
+}
+
+.topbar-actions .help-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* On mobile */
+@media (max-width: 900px) {
+  .help-card {
+    padding: 24px 16px 16px;
+    margin: 16px;
+  }
+  
+  .help-slides {
+    min-height: 250px;
+  }
+}

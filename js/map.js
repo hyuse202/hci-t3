@@ -6,6 +6,7 @@ import { CONFIG } from './config.js';
 import { state } from './state.js';
 import { drawPath } from './route.js';
 import { renderIcons } from './icons.js';
+import { updateMarkersVisibility } from './markers.js';
 
 // --- Map init ---
 export function initMap() {
@@ -132,10 +133,8 @@ export function switchFloor(floorNum) {
     next.addTo(state.map);
   }
 
-  // Hiện markers của floor mới
-  if (state.markerLayers[floorNum]) {
-    state.markerLayers[floorNum].forEach(m => m.addTo(state.map));
-  }
+  // Cập nhật ẩn/hiện markers theo tầng và mức zoom mới
+  updateMarkersVisibility();
 
   if (state.gpsMarker && state.gpsNode) {
     if (state.gpsNode.floor === state.currentFloor) {

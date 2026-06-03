@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="css/search.css" />
   <link rel="stylesheet" href="css/route-card.css" />
   <link rel="stylesheet" href="css/gps-onboarding.css" />
+  <link rel="stylesheet" href="css/help-overlay.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#ffffff" />
 
@@ -37,7 +38,7 @@
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="T3 Routing" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </head>
 <body class="app">
 
@@ -56,6 +57,9 @@
       </div>
       <button class="gps-toggle-btn" id="gps-toggle-btn" title="Bật GPS giả lập">
         <i data-lucide="satellite-dish" class="gps-icon"></i>
+      </button>
+      <button class="help-toggle-btn" id="help-toggle-btn" title="Hướng dẫn sử dụng">
+        <i data-lucide="help-circle"></i>
       </button>
     </div>
   </header>
@@ -192,6 +196,56 @@
       <p>Để tìm đường nhanh nhất, hãy cho phép truy cập vị trí hiện tại của bạn trong nhà ga.</p>
       <button id="gps-allow-btn" class="btn btn-primary"><i data-lucide="locate" style="width:16px;height:16px;"></i> Cho phép</button>
       <button id="gps-skip-btn" class="btn btn-ghost btn-small">Bỏ qua</button>
+    </div>
+  </div>
+
+  <!-- Help / Onboarding Overlay -->
+  <div class="help-overlay hidden" id="help-overlay">
+    <div class="help-card">
+      <button class="help-close-btn" id="help-close-btn" title="Đóng"><i data-lucide="x"></i></button>
+      
+      <div class="help-slides" id="help-slides">
+        <!-- Slide 1 -->
+        <div class="help-slide active" data-index="0">
+          <div class="slide-icon"><i data-lucide="compass"></i></div>
+          <h3>Tìm đường nhanh chóng</h3>
+          <p>Chạm trực tiếp vào các địa điểm trên bản đồ để chọn điểm đi/đến. Hoặc sử dụng thanh tìm kiếm ở đầu trang để tìm nhanh địa điểm của bạn.</p>
+        </div>
+        
+        <!-- Slide 2 -->
+        <div class="help-slide" data-index="1">
+          <div class="slide-icon"><i data-lucide="maximize-2"></i></div>
+          <h3>Bản đồ Tối giản & Thu phóng</h3>
+          <p>Khi tìm đường, bản đồ sẽ tự động làm mờ các khu vực không liên quan. Hãy <strong>phóng to</strong> để hiển thị các tiện ích (WC, Cafe) và <strong>thu nhỏ</strong> để ẩn bớt, tránh rối mắt.</p>
+        </div>
+        
+        <!-- Slide 3 -->
+        <div class="help-slide" data-index="2">
+          <div class="slide-icon"><i data-lucide="footprints"></i></div>
+          <h3>Di chuyển theo chặng</h3>
+          <p>Lộ trình của bạn được chia nhỏ thành các chặng rõ ràng: di chuyển tại các tầng và hướng dẫn đổi tầng (thang máy, thang cuốn, thang bộ) hiển thị trực quan.</p>
+        </div>
+        
+        <!-- Slide 4 -->
+        <div class="help-slide" data-index="3">
+          <div class="slide-icon"><i data-lucide="satellite-dish"></i></div>
+          <h3>Định vị GPS Giả lập</h3>
+          <p>Bật nút vệ tinh trên thanh công cụ, sau đó chạm vào vị trí bất kỳ trên bản đồ để đặt vị trí hiện tại và mô phỏng dẫn đường thời gian thực.</p>
+        </div>
+      </div>
+      
+      <div class="help-footer">
+        <div class="help-dots" id="help-dots">
+          <span class="dot active" data-index="0"></span>
+          <span class="dot" data-index="1"></span>
+          <span class="dot" data-index="2"></span>
+          <span class="dot" data-index="3"></span>
+        </div>
+        <div class="help-nav-buttons">
+          <button class="btn btn-ghost btn-small" id="help-prev-btn" style="visibility: hidden;">Trước</button>
+          <button class="btn btn-primary btn-small" id="help-next-btn">Tiếp tục</button>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 't3-shell-v7';
+const CACHE_NAME = 't3-shell-v19';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const APP_SHELL = [
   './css/search.css',
   './css/route-card.css',
   './css/gps-onboarding.css',
+  './css/help-overlay.css',
   // JS modules
   './js/icons.js',
   './js/config.js',
@@ -32,6 +33,7 @@ const APP_SHELL = [
   './js/search.js',
   './js/ui.js',
   './js/sw-register.js',
+  './js/help.js',
   './js/app.js',
   // PWA assets
   './manifest.json',

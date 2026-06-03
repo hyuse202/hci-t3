@@ -47,7 +47,7 @@ function matchesCategory(normalizedLabel, keywords) {
   return keywords.some(keyword => normalizedLabel.includes(normalizeText(keyword)));
 }
 
-function getCategoryForLabel(label) {
+export function getCategoryForLabel(label) {
   const trimmed = label.trim();
   const normalized = normalizeText(trimmed);
 
@@ -62,6 +62,25 @@ function getCategoryForLabel(label) {
   return 'other';
 }
 
+// --- Helper: Tên rút gọn hiển thị dưới icon giống Google Maps ---
+function getAnnotationLabel(node, category) {
+  const shortLabel = node.label.replace(/^[\p{Emoji}\p{Emoji_Component}]+\s*/u, '').trim();
+  if (category === 'wc') return 'WC';
+  if (category === 'food') return 'Cafe';
+  if (category === 'gate') return shortLabel;
+  if (category === 'lounge') {
+    if (shortLabel.toLowerCase().includes('lounge')) return shortLabel;
+    return shortLabel.replace('Phòng khách', 'Lounge');
+  }
+  if (category === 'elevator') return 'Thang máy';
+  if (category === 'escalator') return 'Thang cuốn';
+  if (category === 'stairs') return 'Thang bộ';
+  if (category === 'baggage') return 'Hành lý';
+  if (category === 'smoke') return 'Hút thuốc';
+  if (category === 'checkin') return 'Thủ tục';
+  return shortLabel || node.label;
+}
+
 // --- Create Marker for a POI ---
 export function createPOIMarker(node, map) {
   if (node.id === 'gps') return null;
@@ -72,13 +91,16 @@ export function createPOIMarker(node, map) {
   const category = isCustom ? 'custom' : getCategoryForLabel(shortLabel || node.label);
   const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
   const lucideName = CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
+  const displayLabel = getAnnotationLabel(node, category);
 
   const icon = L.divIcon({
     className: 'poi-marker',
     html: `
-      <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};" data-node-id="${node.id}" data-label="${shortLabel}">
-        <span class="pill-icon"><i data-lucide="${lucideName}"></i></span>
-        <span class="pill-label">${shortLabel}</span>
+      <div class="poi-marker-wrapper" data-node-id="${node.id}">
+        <div class="poi-pill${isCustom ? ' is-custom' : ''}" style="--poi-color: ${color};" data-node-id="${node.id}">
+          <span class="pill-icon"><i data-lucide="${lucideName}"></i></span>
+        </div>
+        <div class="poi-label-tag">${displayLabel}</div>
       </div>
     `,
     iconSize: [36, 36],
@@ -100,13 +122,8 @@ export function createPOIMarker(node, map) {
 
     if (state.editMode) return;
 
-    // Toggle expand
-    document.querySelectorAll('.poi-pill.expanded').forEach(el => {
-      if (el.dataset.nodeId !== node.id) el.classList.remove('expanded');
-    });
     const pillEl = document.querySelector(`.poi-pill[data-node-id="${node.id}"]`);
     if (pillEl) {
-      pillEl.classList.add('expanded');
       pillEl.classList.remove('tapped');
       void pillEl.offsetWidth;
       pillEl.classList.add('tapped');
@@ -178,14 +195,10 @@ export function placeMarkers(map) {
     const marker = createPOIMarker(node, map);
     if (!marker) return;
     state.markerLayers[node.floor].push(marker);
-
-    if (node.floor === state.currentFloor) {
-      marker.addTo(map);
-    }
   });
 
-  // Render Lucide icons inside marker pills
-  renderIcons();
+  // Áp dụng bộ lọc ẩn/hiện ban đầu
+  updateMarkersVisibility();
 }
 
 // --- Refresh all markers ---
@@ -195,7 +208,6 @@ export function refreshMarkers() {
   });
   state.markerLayers = {};
   placeMarkers(state.map);
-  renderIcons();
 }
 
 // --- Populate dropdowns ---
@@ -231,4 +243,130 @@ export function populateDropdowns() {
     fromSelect.value = 'gps';
     fromSelect.disabled = true;
   }
+}
+
+// --- Helper: Tính khoảng cách từ điểm P đến đoạn thẳng AB ---
+function getDistanceToSegment(p, a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const l2 = dx * dx + dy * dy;
+  if (l2 === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+// --- Cập nhật hiển thị marker dựa trên zoom và định tuyến ---
+export function updateMarkersVisibility() {
+  if (!state.map) return;
+
+  const currentZoom = state.map.getZoom();
+  const isRouteActive = !!state.currentPath;
+  const currentFloor = state.currentFloor;
+  const allNodes = getAllNodes();
+
+  // Tập hợp các ID thuộc lộ trình chính
+  const pathNodeIds = new Set(state.currentPath || []);
+
+  // Xác định các tiện ích nằm dọc lộ trình
+  const utilitiesAlongPath = new Set();
+  if (isRouteActive) {
+    const floorPathNodes = (state.currentPath || [])
+      .map(id => state.markerRefs[id]?.node)
+      .filter(n => n && n.floor === currentFloor);
+
+    const segments = [];
+    for (let i = 0; i < floorPathNodes.length - 1; i++) {
+      segments.push({ a: floorPathNodes[i], b: floorPathNodes[i + 1] });
+    }
+
+    allNodes.forEach(node => {
+      if (node.floor !== currentFloor) return;
+      if (pathNodeIds.has(node.id)) return;
+      if (node.id === 'gps') return;
+
+      const category = getCategoryForLabel(node.label);
+      const isUtility = ['wc', 'food', 'elevator', 'escalator', 'smoke'].includes(category);
+      if (!isUtility) return;
+
+      let minDistance = Infinity;
+      segments.forEach(seg => {
+        const d = getDistanceToSegment(node, seg.a, seg.b);
+        if (d < minDistance) minDistance = d;
+      });
+
+      if (minDistance <= 120) {
+        utilitiesAlongPath.add(node.id);
+      }
+    });
+  }
+
+  // Áp dụng bộ lọc hiển thị
+  allNodes.forEach(node => {
+    const ref = state.markerRefs[node.id];
+    if (!ref || !ref.marker) return;
+
+    const marker = ref.marker;
+    const isCustom = node.id.startsWith('custom-');
+    const category = isCustom ? 'custom' : getCategoryForLabel(node.label);
+
+    // 1. Chỉ hiển thị thuộc tầng hiện tại
+    if (node.floor !== currentFloor) {
+      if (state.map.hasLayer(marker)) {
+        state.map.removeLayer(marker);
+      }
+      return;
+    }
+
+    // 2. Quy tắc hiển thị
+    let shouldShow = false;
+
+    if (isRouteActive) {
+      const isInPath = pathNodeIds.has(node.id);
+      const isUtilNear = utilitiesAlongPath.has(node.id);
+      shouldShow = isInPath || isUtilNear;
+    } else {
+      const isProminent = ['gate', 'lounge', 'checkin', 'custom'].includes(category) || node.id === 'gps';
+      if (currentZoom > 0) {
+        shouldShow = true;
+      } else {
+        shouldShow = isProminent;
+      }
+    }
+
+    // 3. Render lên bản đồ
+    if (shouldShow) {
+      if (!state.map.hasLayer(marker)) {
+        marker.addTo(state.map);
+      }
+
+      const element = marker.getElement();
+      if (element) {
+        element.style.display = '';
+        const pill = element.querySelector('.poi-pill');
+        if (pill) {
+          pill.classList.remove('expanded');
+          if (isRouteActive) {
+            const isInPath = pathNodeIds.has(node.id);
+            if (isInPath) {
+              pill.style.opacity = '1.0';
+              pill.style.transform = 'scale(1.1)';
+            } else {
+              pill.style.opacity = '0.85';
+              pill.style.transform = 'scale(0.85)';
+            }
+          } else {
+            pill.style.opacity = '';
+            pill.style.transform = '';
+          }
+        }
+      }
+    } else {
+      if (state.map.hasLayer(marker)) {
+        state.map.removeLayer(marker);
+      }
+    }
+  });
+
+  renderIcons();
 }

@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-7);
+  padding: var(--safe-top) var(--space-7) 0 var(--space-7);
   border-bottom: 1px solid var(--hairline);
   background: var(--canvas);
   position: sticky;
@@ -60,12 +60,12 @@
 /* --- Responsive: ≤900px --- */
 @media (max-width: 900px) {
   :root {
-    --topbar-h: 64px;
+    --base-topbar-h: 64px;
   }
 
   .topbar {
     height: var(--topbar-h);
-    padding: 0 var(--space-4);
+    padding: var(--safe-top) var(--space-4) 0 var(--space-4);
     flex-direction: row;
     align-items: center;
     gap: 8px;
@@ -100,12 +100,12 @@
 /* --- Responsive: ≥901px --- */
 @media (min-width: 901px) {
   :root {
-    --topbar-h: 80px;
+    --base-topbar-h: 80px;
   }
 
   .topbar {
     height: var(--topbar-h);
-    padding: 0 var(--space-7);
+    padding: var(--safe-top) var(--space-7) 0 var(--space-7);
     flex-direction: row;
     align-items: center;
     gap: 16px;

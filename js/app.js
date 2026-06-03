@@ -7,7 +7,7 @@
 import { CONFIG } from './config.js';
 import { state } from './state.js';
 import { initMap, createFloorLayers, createPlaceholderLayers, switchFloor, checkImagesExist } from './map.js';
-import { placeMarkers, populateDropdowns, refreshMarkers, getAllNodes } from './markers.js';
+import { placeMarkers, populateDropdowns, refreshMarkers, getAllNodes, updateMarkersVisibility } from './markers.js';
 import { findRoute, syncRouteCardToggle } from './route.js';
 import { clearRoute, clearSelection } from './selection.js';
 import { addCustomNode, deleteCustomNode, exportCoords, loadCustomNodes, loadPoiPositions, saveCustomNodes, renderCustomPointsList } from './custom-nodes.js';
@@ -16,10 +16,14 @@ import { setupPanelToggle, autoOpenPanel } from './ui.js';
 import { registerServiceWorker } from './sw-register.js';
 import { setupSearchEvents } from './search.js';
 import { renderIcons } from './icons.js';
+import { setupHelpOverlay } from './help.js';
 
 function init() {
   state.map = initMap();
   createFloorLayers(state.map);
+
+  // Đăng ký sự kiện thay đổi zoom để ẩn/hiện marker tương ứng
+  state.map.on('zoomend', updateMarkersVisibility);
 
   // Khôi phục điểm đã lưu
   loadCustomNodes();
@@ -30,6 +34,7 @@ function init() {
   populateDropdowns();
   renderCustomPointsList();
   setupPanelToggle();
+  setupHelpOverlay();
 
   // Route info collapse toggle (desktop panel)
   const routeInfo = document.getElementById('route-info');
@@ -125,49 +130,82 @@ function init() {
   // Search events
   setupSearchEvents();
 
-  // Route card drag: swipe down → collapse to peek, swipe up → expand
+  // Route card drag: swipe down → collapse, swipe up → expand / maximize
   const routeCard = document.getElementById('route-card');
   if (routeCard) {
     let touchStartY = 0;
-    let cardTranslateY = 0;
+    let dy = 0;
 
     routeCard.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.drag-handle') || routeCard.classList.contains('collapsed')) {
+      const isHandle = e.target.closest('.drag-handle');
+      const isHeader = e.target.closest('.route-card-header') && !e.target.closest('.route-card-actions');
+      if (isHandle || isHeader || routeCard.classList.contains('collapsed')) {
         touchStartY = e.touches[0].clientY;
+        dy = 0;
+        routeCard.style.transition = 'none'; // Tắt transition khi đang kéo tay
       }
     }, { passive: true });
 
     routeCard.addEventListener('touchmove', (e) => {
       if (touchStartY === 0) return;
-      const dy = e.touches[0].clientY - touchStartY;
+      dy = e.touches[0].clientY - touchStartY;
 
+      // Di chuyển theo tay kéo
       if (routeCard.classList.contains('collapsed')) {
-        // Swiping up from collapsed → expand
-        if (dy < -30) {
-          routeCard.classList.remove('collapsed');
-          routeCard.dataset.userCollapse = 'expanded';
-          syncRouteCardToggle(routeCard);
-          touchStartY = 0;
-        }
-      } else {
-        // Swiping down → follow finger
-        if (dy > 0) {
-          cardTranslateY = dy;
+        if (dy < 0) {
           routeCard.style.transform = `translateY(${dy}px)`;
         }
+      } else if (routeCard.classList.contains('maximized')) {
+        if (dy > 0) {
+          routeCard.style.transform = `translateY(${dy}px)`;
+        }
+      } else {
+        routeCard.style.transform = `translateY(${dy}px)`;
       }
     }, { passive: true });
 
     routeCard.addEventListener('touchend', () => {
-      if (cardTranslateY > 80) {
-        // Collapse to peek state instead of dismissing
-        routeCard.classList.add('collapsed');
-        routeCard.dataset.userCollapse = 'collapsed';
-        syncRouteCardToggle(routeCard);
-      }
+      if (touchStartY === 0) return;
+      routeCard.style.transition = '';
       routeCard.style.transform = '';
+
+      const threshold = 60; // Ngưỡng kéo để chuyển trạng thái
+
+      if (routeCard.classList.contains('collapsed')) {
+        if (dy < -threshold) {
+          // Collapsed -> Expanded
+          routeCard.classList.remove('collapsed');
+          routeCard.classList.remove('maximized');
+          routeCard.dataset.userCollapse = 'expanded';
+          syncRouteCardToggle(routeCard);
+        }
+      } else if (routeCard.classList.contains('maximized')) {
+        if (dy > threshold) {
+          // Maximized -> Expanded
+          routeCard.classList.remove('collapsed');
+          routeCard.classList.remove('maximized');
+          routeCard.dataset.userCollapse = 'expanded';
+          syncRouteCardToggle(routeCard);
+        }
+      } else {
+        // Trạng thái hiện tại: Expanded
+        if (dy > threshold) {
+          // Expanded -> Collapsed
+          routeCard.classList.add('collapsed');
+          routeCard.classList.remove('maximized');
+          routeCard.dataset.userCollapse = 'collapsed';
+          syncRouteCardToggle(routeCard);
+        } else if (dy < -threshold) {
+          // Expanded -> Maximized
+          routeCard.classList.remove('collapsed');
+          routeCard.classList.add('maximized');
+          routeCard.dataset.userCollapse = 'maximized';
+          syncRouteCardToggle(routeCard);
+        }
+      }
+
       touchStartY = 0;
-      cardTranslateY = 0;
+      dy = 0;
     }, { passive: true });
   }
 

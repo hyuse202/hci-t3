@@ -61,7 +61,10 @@
   --space-9: 64px;
 
   /* --- Layout --- */
-  --topbar-h: 80px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --base-topbar-h: 80px;
+  --topbar-h: calc(var(--base-topbar-h) + var(--safe-top));
   --panel-w: 360px;
   --sheet-peek: 74px;
 }
